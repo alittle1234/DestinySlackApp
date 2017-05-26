@@ -28,19 +28,24 @@ app.get('/c', function(req, response) {
   response.send('pages/index2');
 });
 
-app.post('/d', urlencodedParser, function  (req, res) {
+app.post('/d', urlencodedParser, function (req, res) {
+  if (!req.body) return res.sendStatus(400)
+  res.send('welcome, ' + req.body.command)
+})
+
+app.post('/dead', urlencodedParser, function(req, res) {
 	//+ req.params.join(",")
 	var concat = '';
 	if(req.body){
-	var reqBody = req.body;
-    var responseURL = reqBody.response_url;
-	//reqBody.token
-	//reqBody.command
-	//text
-	if(responseURL != null){concat += ' responseURL: ' + responseURL;}
-	if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
-	if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
-	if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
+		var reqBody = req.body;
+		var responseURL = reqBody.response_url;
+		//reqBody.token
+		//reqBody.command
+		//text
+		if(responseURL != null){concat += ' responseURL: ' + responseURL;}
+		if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
+		if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
+		if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
 	}else{
 		concat += ' NO BODY ';
 	}
