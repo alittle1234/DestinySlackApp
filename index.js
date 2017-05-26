@@ -41,7 +41,20 @@ app.post('/d', urlencodedParser, function(req, res) {
 		return res.sendStatus(400);
 	}
 		
-	  
+	handleDestinyReq(req, res);
+});
+
+app.post('/d/actions', urlencodedParser, function(req, res) {
+	//+ req.params.join(",")
+	
+    if (!req.body) {
+		return res.sendStatus(400);
+	}
+	
+	handleDestinyReq(req, res);
+});
+
+function handleDestinyReq(req, res){
 	var concat = '';
 	try{
 		if(req.body){
@@ -76,14 +89,13 @@ app.post('/d', urlencodedParser, function(req, res) {
 	}catch(e){ // why doesnt this work?
 		concat = e.message;
 	}
-	
-    //res.send('data c: ' + concat  );
-});
+}
 
 function parseText(textString){
 	// text contains "command" plus parameters
 	// i dont know how these are deliminated yet
 	// could be json?
+	return "";
 }
 
 function getRequestBodyText(req){
