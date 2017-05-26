@@ -33,6 +33,7 @@ app.post('/dead', urlencodedParser, function (req, res) {
   res.send('welcome, ' + req.body.command)
 })
 
+var log = true;
 app.post('/d', urlencodedParser, function(req, res) {
 	//+ req.params.join(",")
 	
@@ -45,28 +46,88 @@ app.post('/d', urlencodedParser, function(req, res) {
 	try{
 		if(req.body){
 			var reqBody = req.body;
-			//reqBody.token
-			//reqBody.command
-			//text
-			if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
-			if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
-			if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
-			if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
-			//if(reqBody.json()){concat += ' rb.json(): ' + reqBody.json();}
 			
-			if(reqBody.text.indexOf('stringify') !== -1){
-				concat += ' rbconcat: ' + JSON.stringify(req.body);
-			}
+			var log = getRequestBodyText(req); // TODO append log to all responses when log is true
+			var textData = parseText(req.body.text);
+			
+			// test send interactive message
+			sendMessage(reqBody.response_url);
+			
+			// parse text
+			// perform action
+			// add "log"
 		}else{
 			concat += ' NO BODY ';
 		}
-	}catch(e){
+	}catch(e){ // why doesnt this work?
 		concat = e.message;
 	}
 	
     res.send('data c: ' + concat  );
 });
 
+function parseText(textString){
+	// text contains "command" plus parameters
+	// i dont know how these are deliminated yet
+	// could be json?
+}
+
+function getRequestBodyText(req){
+	return ' Request: ' + JSON.stringify(req.body);
+}
+
+function sendMessage(responseURL){
+	var message = {
+		"text": "This is your first interactive message",
+		"attachments": [
+			{
+				"text": "Building buttons is easy right?",
+				"fallback": "Shame... buttons aren't supported in this land",
+				"callback_id": "button_tutorial",
+				"color": "#3AA3E3",
+				"attachment_type": "default",
+				"actions": [
+					{
+						"name": "yes",
+						"text": "yes",
+						"type": "button",
+						"value": "yes"
+					},
+					{
+						"name": "no",
+						"text": "no",
+						"type": "button",
+						"value": "no"
+					},
+					{
+						"name": "maybe",
+						"text": "maybe",
+						"type": "button",
+						"value": "maybe",
+						"style": "danger"
+					}
+				]
+			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
+}
+
+function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+    var postOptions = {
+        uri: responseURL,
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json'
+        },
+        json: JSONmessage
+    }
+    request(postOptions, (error, response, body) => {
+        if (error){
+            // handle errors as you see fit
+        }
+    })
+}
 // https://polar-island-85982.herokuapp.com/button-endpoint
 
 app.listen(app.get('port'), function() {
