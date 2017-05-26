@@ -39,7 +39,6 @@ app.post('/d', urlencodedParser, function(req, res) {
     if (!req.body) {
 		return res.sendStatus(400);
 	}
-	parseText(req.body)
 		
 	  
 	var concat = '';
