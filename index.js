@@ -20,29 +20,31 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.get('/', function(req, response) {
-  response.render('pages/index2');
+app.get('/', function(req, res) {
+  res.render('pages/index2');
 });
 
-app.get('/c', function(req, response) {
-  response.send('pages/index2');
+app.get('/c', function(req, res) {
+  res.send('pages/index2');
 });
 
-app.post('/d', urlencodedParser, function (req, res) {
+app.post('/dead', urlencodedParser, function (req, res) {
   if (!req.body) return res.sendStatus(400)
   res.send('welcome, ' + req.body.command)
 })
 
-app.post('/dead', urlencodedParser, function(req, res) {
+app.post('/d', urlencodedParser, function(req, res) {
 	//+ req.params.join(",")
+	
+     if (!req.body) return res.sendStatus(400)
+	  
 	var concat = '';
 	if(req.body){
 		var reqBody = req.body;
-		var responseURL = reqBody.response_url;
 		//reqBody.token
 		//reqBody.command
 		//text
-		if(responseURL != null){concat += ' responseURL: ' + responseURL;}
+		if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
 		if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
 		if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
 		if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
