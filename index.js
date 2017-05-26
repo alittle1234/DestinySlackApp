@@ -53,12 +53,12 @@ app.post('/d', urlencodedParser, function(req, res) {
 			
 			var payload;
 			if(req.body.payload){ // an action button was clicked
-				payload = JSON.parse(req.body.payload) // turn payload into json obj
+				payload = JSON.parse(req.body.payload); // turn payload into json obj
 				var message = {
 					"text": payload.user.name+" clicked: "+payload.actions[0].name,
 					"replace_original": false
 				}
-				sendMessageToSlackResponseURL(payload.response_url, message)
+				sendMessageToSlackResponseURL(payload.response_url, message);
 			}
 			
 			// test send interactive message
@@ -103,21 +103,21 @@ function getBasicMenu(responseURL){
 				"actions": [
 					{
 						"name": "imon",
-						"value": "imon"
+						"value": "imon",
 						"text": "I'm On!",
-						"type": "button",
+						"type": "button"
 					},
 					{
 						"name": "askgeton",
-						"value": "askgeton"
+						"value": "askgeton",
 						"text": "Is Anyone Getting On?",
-						"type": "button",
+						"type": "button"
 					},
 					{
 						"name": "getgonat",
-						"value": "getgonat"
+						"value": "getgonat",
 						"text": "Getting On At:",
-						"type": "button", // should be menu or return menu types?
+						"type": "button" // should be menu or return menu types?
 					}
 					// TODO menu type, "others"
 					// a menu drop-down of stats, status, etc
