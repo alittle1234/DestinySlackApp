@@ -39,26 +39,37 @@ app.post('/d', urlencodedParser, function(req, res) {
      if (!req.body) return res.sendStatus(400)
 	  
 	var concat = '';
+	if(req.body){
+		var reqBody = req.body;
+		//reqBody.token
+		//reqBody.command
+		//text
+		if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
+		if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
+		if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
+		if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
+	}else{
+		concat += ' NO BODY ';
+	}
+	// var q = req.query;
+	// if(q != null){concat += ' query: ' + q;}
 	
-	var q = req.query;
-	if(q != null){concat += ' query: ' + q;}
+	// var method = req.method;
+	// if(method != null){concat += ' method: ' + method;}
 	
-	var method = req.method;
-	if(method != null){concat += ' method: ' + method;}
+	// var Content = req.get('Content-Type');
+	// if(Content != null){concat += ' Content-Type: ' + Content;}
 	
-	var Content = req.get('Content-Type');
-	if(Content != null){concat += ' Content-Type: ' + Content;}
+	// var cm = req.query.command;
+	// if(cm != null){concat += ' command: ' + cm;}
 	
-	var cm = req.query.command;
-	if(cm != null){concat += ' command: ' + cm;}
+	// var p = req.path;
+	// if(p != null){concat += ' path: ' + p;}
 	
-	var p = req.path;
-	if(p != null){concat += ' path: ' + p;}
+	// var pr = req.param('command');
+	// if(pr != null){concat += ' param.command: ' + pr;}
 	
-	var pr = req.param('command');
-	if(pr != null){concat += ' param.command: ' + pr;}
-	
-    res.send('pages/index2 c: ' + concat  +  ' b: ' + req.body);
+    res.send('data c: ' + concat  );
 });
 
 // https://polar-island-85982.herokuapp.com/button-endpoint
