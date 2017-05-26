@@ -27,7 +27,13 @@ app.get('/c', function(request, response) {
 
 app.post('/d', function(req, res) {
 	//+ req.params.join(",")
-    res.send('pages/index2 c: '  + req.params.command ' b: ' + req.body);
+	var concat = '';
+	var q = req.query;
+	if(q != null){concat += ' query: ' + q;}
+	
+	var p = req.path;
+	if(p != null){concat += ' path: ' + p;}
+    res.send('pages/index2 c: ' + concat  +  ' b: ' + req.body);
 });
 
 // https://polar-island-85982.herokuapp.com/button-endpoint
