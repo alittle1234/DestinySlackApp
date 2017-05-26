@@ -59,17 +59,17 @@ app.post('/d', urlencodedParser, function(req, res) {
 					"replace_original": true
 				}
 				sendMessageToSlackResponseURL(payload.response_url, message);
+			}else{
+				// test send interactive message
+				//sendMessage(reqBody.response_url);
+				
+				// TODO check action... was basic menu?
+				getBasicMenu(reqBody.response_url);
+				
+				// parse text
+				// perform action
+				// add "log"
 			}
-			
-			// test send interactive message
-			//sendMessage(reqBody.response_url);
-			
-			// TODO check action... was basic menu?
-			getBasicMenu(reqBody.response_url);
-			
-			// parse text
-			// perform action
-			// add "log"
 		}else{
 			concat += ' NO BODY ';
 		}
