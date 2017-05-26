@@ -4,13 +4,6 @@ var bodyParser = require('body-parser')
 var app = express();
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
-// var bodyParser = require('body-parser')
-// app.use(bodyParser.json());       // to support JSON-encoded bodies
-// app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  // extended: true
-// })); 
-// app.use(express.json());       // to support JSON-encoded bodies
-// app.use(express.urlencoded()); // to support URL-encoded bodies
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -24,16 +17,18 @@ app.get('/', function(req, res) {
   res.render('pages/index2');
 });
 
-app.get('/c', function(req, res) {
-  res.send('pages/index2');
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
 });
 
-app.post('/dead', urlencodedParser, function (req, res) {
-  if (!req.body) return res.sendStatus(400)
-  res.send('welcome, ' + req.body.command)
-})
 
+// https://polar-island-85982.herokuapp.com/
+
+
+// should the response inlcude the request
 var log = true;
+
+// end point for /d command
 app.post('/d', urlencodedParser, function(req, res) {
 	//+ req.params.join(",")
 	
@@ -44,6 +39,7 @@ app.post('/d', urlencodedParser, function(req, res) {
 	handleDestinyReq(req, res);
 });
 
+// endpoint for button actions
 app.post('/d/actions', urlencodedParser, function(req, res) {
 	//+ req.params.join(",")
 	
@@ -54,8 +50,11 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 	handleDestinyReq(req, res);
 });
 
+var action_imon = "imon";
+
+// handle all the destiny app requests
 function handleDestinyReq(req, res){
-	res.status(200).end() 
+	res.status(200).end(); // prevents weird time-out response
 	
 	var concat = '';
 	try{
@@ -69,11 +68,16 @@ function handleDestinyReq(req, res){
 			var payload;
 			if(req.body.payload){ // an action button was clicked
 				payload = JSON.parse(req.body.payload); // turn payload into json obj
-				var message = {
-					"text": payload.user.name+" clicked: "+payload.actions[0].name,
-					"replace_original": true
+				
+				if(action_imon == payload.actions[0].name){
+					doImOn(payload, payload.user);
+				}else{
+					var message = {
+						"text": payload.user.name+" clicked: "+payload.actions[0].name,
+						"replace_original": false
+					}
+					sendMessageToSlackResponseURL(payload.response_url, message);
 				}
-				sendMessageToSlackResponseURL(payload.response_url, message);
 			}else{
 				// test send interactive message
 				//sendMessage(reqBody.response_url);
@@ -93,6 +97,85 @@ function handleDestinyReq(req, res){
 	}
 }
 
+var icon_url = 	  "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
+var app_name = "Destiny App";
+
+var invite_color = "#31110A";
+var join_ask = "Join them?";
+
+var join_im_on_callback = "join_im_on";
+var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
+
+// lookup thumbnail for most recent player background
+function getThumbUrl(username){
+	return def_thum_url;
+}
+
+// get associated destiny name
+function getPlayerName(user){
+	return user;
+}
+
+// i'm on
+// PetterNincompoop is on Destiny!
+// [image] [timestamp?] [activity?]
+// Join them? [yes] [maybe] [no]
+function doImOn(payload, user){
+	var username = getPlayerName(user);
+	var title = "*" + username + "*" + " is on Destiny!";
+	
+	var message = {
+		"text": title,
+		"username": app_name,
+		"icon_url": icon_url,
+		"attachments": [
+			getJoinAttachment(username)
+		]
+	}
+	sendMessageToSlackResponseURL(payload.response_url, message);
+}
+
+function getJoinAttachment(username){
+	return {
+				"text": join_ask,
+				"fallback": "Join " + username + " on Destiny?",
+				"callback_id": join_im_on_callback,
+				"color": invite_color,
+				"attachment_type": "default", // TODO what is this?
+				"thumb_url": getThumbUrl(username),
+
+				"actions": [
+					{
+						"name": "yes",
+						"value": "yes",
+						"text": "Yes",
+						"type": "button"
+					},
+					{
+						"name": "maybe",
+						"value": "maybe",
+						"text": "Maybe",
+						"type": "button"
+					},
+					{
+						"name": "no",
+						"value": "no",
+						"text": "No",
+						"type": "button"
+					}
+					// TODO need to handle "poll" actions
+				]
+			}
+}
+// anyone getting on
+// Join them? [yes] [maybe] [no]
+
+// raid tonight|tommorow ?
+// Join them? [yes] [maybe] [no]
+
+
+// get the 'command' sent... should be if /d is used in conj w another
+// slack bot can scan user input and auto-send slash command to activate app
 function parseText(textString){
 	// text contains "command" plus parameters
 	// i dont know how these are deliminated yet
@@ -100,10 +183,12 @@ function parseText(textString){
 	return "";
 }
 
+// string version of json req body
 function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
 }
 
+// return the basic menu as response
 function getBasicMenu(responseURL){
 	var message = {
 		//"text": "This is your first interactive message",
@@ -116,8 +201,8 @@ function getBasicMenu(responseURL){
 				"attachment_type": "default", // TODO what is this?
 				"actions": [
 					{
-						"name": "imon",
-						"value": "imon",
+						"name": action_imon
+						"value": action_imon
 						"text": "I'm On!",
 						"type": "button"
 					},
@@ -142,6 +227,7 @@ function getBasicMenu(responseURL){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
+// temp send message
 function sendMessage(responseURL){
 	var message = {
 		"text": "This is your first interactive message",
@@ -179,6 +265,7 @@ function sendMessage(responseURL){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
+// send a message to slack url
 function sendMessageToSlackResponseURL(responseURL, JSONmessage){
     var postOptions = {
         uri: responseURL,
@@ -194,10 +281,5 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
         }
     })
 }
-// https://polar-island-85982.herokuapp.com/button-endpoint
-
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
 
 
