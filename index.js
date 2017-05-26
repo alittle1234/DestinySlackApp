@@ -55,7 +55,7 @@ app.post('/d', urlencodedParser, function(req, res) {
 			//if(reqBody.json()){concat += ' rb.json(): ' + reqBody.json();}
 			
 			if(reqBody.text.indexOf('stringify') !== -1){
-				//concat += ' rbconcat: ' + JSON.stringify(req.body);
+				concat += ' rbconcat: ' + JSON.stringify(req.body);
 			}
 		}else{
 			concat += ' NO BODY ';
