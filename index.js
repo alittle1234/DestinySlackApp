@@ -31,6 +31,11 @@ app.post('/d', function(req, res) {
 	var q = req.query;
 	if(q != null){concat += ' query: ' + q;}
 	
+	var method = req.method;
+	if(method != null){concat += ' method: ' + method;}
+	
+	var Content = req.get('Content-Type');
+	if(Content != null){concat += ' Content-Type: ' + Content;}
 	
 	var cm = req.query.command;
 	if(cm != null){concat += ' command: ' + cm;}
@@ -38,9 +43,9 @@ app.post('/d', function(req, res) {
 	var p = req.path;
 	if(p != null){concat += ' path: ' + p;}
 	
+	var pr = req.param('command');
+	if(pr != null){concat += ' param.command: ' + pr;}
 	
-	// var pr = req.param();
-	//if(pr != null){concat += ' param: ' + pr;}
     res.send('pages/index2 c: ' + concat  +  ' b: ' + req.body);
 });
 
