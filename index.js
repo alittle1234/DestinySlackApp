@@ -56,7 +56,7 @@ app.post('/d', urlencodedParser, function(req, res) {
 				payload = JSON.parse(req.body.payload); // turn payload into json obj
 				var message = {
 					"text": payload.user.name+" clicked: "+payload.actions[0].name,
-					"replace_original": false
+					"replace_original": true
 				}
 				sendMessageToSlackResponseURL(payload.response_url, message);
 			}
@@ -77,7 +77,7 @@ app.post('/d', urlencodedParser, function(req, res) {
 		concat = e.message;
 	}
 	
-    res.send('data c: ' + concat  );
+    //res.send('data c: ' + concat  );
 });
 
 function parseText(textString){
