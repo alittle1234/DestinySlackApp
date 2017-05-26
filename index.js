@@ -48,10 +48,24 @@ app.post('/d', urlencodedParser, function(req, res) {
 			var reqBody = req.body;
 			
 			var log = getRequestBodyText(req); // TODO append log to all responses when log is true
+			
 			var textData = parseText(req.body.text);
 			
+			var payload;
+			if(req.body.payload){ // an action button was clicked
+				payload = JSON.parse(req.body.payload) // turn payload into json obj
+				var message = {
+					"text": payload.user.name+" clicked: "+payload.actions[0].name,
+					"replace_original": false
+				}
+				sendMessageToSlackResponseURL(payload.response_url, message)
+			}
+			
 			// test send interactive message
-			sendMessage(reqBody.response_url);
+			//sendMessage(reqBody.response_url);
+			
+			// TODO check action... was basic menu?
+			getBasicMenu(reqBody.response_url);
 			
 			// parse text
 			// perform action
@@ -74,6 +88,44 @@ function parseText(textString){
 
 function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
+}
+
+function getBasicMenu(responseURL){
+	var message = {
+		//"text": "This is your first interactive message",
+		"attachments": [
+			{
+				"text": "Destiny Action:",
+				"fallback": "Interactive buttons need to be enabled.",
+				"callback_id": "destiny_basic",
+				"color": "#3AA3E3",// TODO destiny basic color
+				"attachment_type": "default", // TODO what is this?
+				"actions": [
+					{
+						"name": "imon",
+						"value": "imon"
+						"text": "I'm On!",
+						"type": "button",
+					},
+					{
+						"name": "askgeton",
+						"value": "askgeton"
+						"text": "Is Anyone Getting On?",
+						"type": "button",
+					},
+					{
+						"name": "getgonat",
+						"value": "getgonat"
+						"text": "Getting On At:",
+						"type": "button", // should be menu or return menu types?
+					}
+					// TODO menu type, "others"
+					// a menu drop-down of stats, status, etc
+				]
+			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
 }
 
 function sendMessage(responseURL){
