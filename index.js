@@ -28,7 +28,7 @@ app.get('/c', function(req, response) {
   response.send('pages/index2');
 });
 
-app.post('/d', urlencodedParser, (req, res) {
+app.post('/d', urlencodedParser, function  (req, res) {
 	//+ req.params.join(",")
 	var concat = '';
 	if(req.body){
