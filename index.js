@@ -39,18 +39,7 @@ app.post('/d', urlencodedParser, function(req, res) {
      if (!req.body) return res.sendStatus(400)
 	  
 	var concat = '';
-	if(req.body){
-		var reqBody = req.body;
-		//reqBody.token
-		//reqBody.command
-		//text
-		if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
-		if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
-		if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
-		if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
-	}else{
-		concat += ' NO BODY ';
-	}
+	
 	var q = req.query;
 	if(q != null){concat += ' query: ' + q;}
 	
