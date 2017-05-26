@@ -1,5 +1,8 @@
 var express = require('express');
+var request = require('request')
+var bodyParser = require('body-parser')
 var app = express();
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // var bodyParser = require('body-parser')
 // app.use(bodyParser.json());       // to support JSON-encoded bodies
@@ -17,17 +20,27 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.get('/', function(request, response) {
+app.get('/', function(req, response) {
   response.render('pages/index2');
 });
 
-app.get('/c', function(request, response) {
+app.get('/c', function(req, response) {
   response.send('pages/index2');
 });
 
 app.post('/d', function(req, res) {
 	//+ req.params.join(",")
+	var reqBody = req.body
+    var responseURL = reqBody.response_url
+	//reqBody.token
+	//reqBody.command
+	//text
 	var concat = '';
+	if(responseURL != null){concat += ' responseURL: ' + responseURL;}
+	if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
+	if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
+	if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
+	
 	var q = req.query;
 	if(q != null){concat += ' query: ' + q;}
 	
