@@ -26,8 +26,10 @@ app.get('/c', function(request, response) {
 });
 
 app.post('/d', function(req, res) {
-    res.send('pages/index2');
+    res.send('pages/index2 ' + req.params);
 });
+
+// https://polar-island-85982.herokuapp.com/button-endpoint
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
