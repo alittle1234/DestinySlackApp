@@ -43,6 +43,7 @@ app.post('/d', urlencodedParser, function(req, res) {
 		
 	  
 	var concat = '';
+	try{
 	if(req.body){
 		var reqBody = req.body;
 		//reqBody.token
@@ -58,7 +59,9 @@ app.post('/d', urlencodedParser, function(req, res) {
 	}else{
 		concat += ' NO BODY ';
 	}
-	
+	}catch(e){
+		concat = e;
+	}
 	
     res.send('data c: ' + concat  );
 });
