@@ -55,6 +55,8 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 });
 
 function handleDestinyReq(req, res){
+	res.status(200).end() 
+	
 	var concat = '';
 	try{
 		if(req.body){
