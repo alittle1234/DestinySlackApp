@@ -30,16 +30,16 @@ app.get('/c', function(req, response) {
 
 app.post('/d', urlencodedParser, (req, res) =>{
 	//+ req.params.join(",")
-	var reqBody = req.body;
-    var responseURL = reqBody.response_url;
+	// var reqBody = req.body;
+    // var responseURL = reqBody.response_url;
 	//reqBody.token
 	//reqBody.command
 	//text
 	var concat = '';
-	if(responseURL != null){concat += ' responseURL: ' + responseURL;}
-	if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
-	if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
-	if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
+	// if(responseURL != null){concat += ' responseURL: ' + responseURL;}
+	// if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
+	// if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
+	// if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
 	
 	var q = req.query;
 	if(q != null){concat += ' query: ' + q;}
