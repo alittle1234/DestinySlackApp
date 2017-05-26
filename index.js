@@ -31,8 +31,16 @@ app.post('/d', function(req, res) {
 	var q = req.query;
 	if(q != null){concat += ' query: ' + q;}
 	
+	
+	var cm = req.query.command;
+	if(cm != null){concat += ' command: ' + cm;}
+	
 	var p = req.path;
 	if(p != null){concat += ' path: ' + p;}
+	
+	
+	// var pr = req.param();
+	//if(pr != null){concat += ' param: ' + pr;}
     res.send('pages/index2 c: ' + concat  +  ' b: ' + req.body);
 });
 
