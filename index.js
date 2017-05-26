@@ -44,23 +44,23 @@ app.post('/d', urlencodedParser, function(req, res) {
 	  
 	var concat = '';
 	try{
-	if(req.body){
-		var reqBody = req.body;
-		//reqBody.token
-		//reqBody.command
-		//text
-		if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
-		if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
-		if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
-		if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
-		//if(reqBody.json()){concat += ' rb.json(): ' + reqBody.json();}
-		
-		concat += ' rbconcat: ' + JSON.stringify(req.body);
-	}else{
-		concat += ' NO BODY ';
-	}
+		if(req.body){
+			var reqBody = req.body;
+			//reqBody.token
+			//reqBody.command
+			//text
+			if(reqBody.response_url != null){concat += ' responseURL: ' + reqBody.response_url;}
+			if(reqBody.token != null){concat += ' token: ' + reqBody.token;}
+			if(reqBody.text != null){concat += ' text: ' + reqBody.text;}
+			if(reqBody.command != null){concat += ' rb.command: ' + reqBody.command;}
+			//if(reqBody.json()){concat += ' rb.json(): ' + reqBody.json();}
+			
+			concat += ' rbconcat: ' + JSON.stringify(req.body);
+		}else{
+			concat += ' NO BODY ';
+		}
 	}catch(e){
-		concat = e;
+		concat = e.message;
 	}
 	
     res.send('data c: ' + concat  );
