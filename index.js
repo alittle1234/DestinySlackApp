@@ -97,7 +97,7 @@ function handleDestinyReq(req, res){
 	}
 }
 
-var icon_url = 	  "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
+var icon_url = "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
 var app_name = "Destiny App";
 
 var invite_color = "#31110A";
@@ -113,7 +113,7 @@ function getThumbUrl(username){
 
 // get associated destiny name
 function getPlayerName(user){
-	return user;
+	return user.name;
 }
 
 // i'm on
@@ -201,8 +201,8 @@ function getBasicMenu(responseURL){
 				"attachment_type": "default", // TODO what is this?
 				"actions": [
 					{
-						"name": action_imon
-						"value": action_imon
+						"name": action_imon,
+						"value": action_imon,
 						"text": "I'm On!",
 						"type": "button"
 					},
