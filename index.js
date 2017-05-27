@@ -128,6 +128,7 @@ function doImOn(payload, user){
 		"text": title,
 		"username": app_name,
 		"icon_url": icon_url,
+		"replace_original": true,
 		"attachments": [
 			getJoinAttachment(username)
 		]
