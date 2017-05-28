@@ -99,7 +99,7 @@ function handleDestinyReq(req, res){
 
 var icon_url = "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
 var app_name = "Destiny App";
-var general_webhook = "https://hooks.slack.com/services/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";
+var general_webhook = "https://hooks.slack.com/services/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";
 
 var invite_color = "#31110A";
 var join_ask = "Join them?";
@@ -209,16 +209,16 @@ function getBasicMenu(responseURL){
 						"type": "button"
 					},
 					{
-						"name": "askgeton",
-						"value": "askgeton",
-						"text": "Is Anyone Getting On?",
+						"name": "getgonat",
+						"value": "getgonat",
+						"text": "I'm On At:",
 						"type": "button"
 					},
 					{
-						"name": "getgonat",
-						"value": "getgonat",
-						"text": "Getting On At:",
-						"type": "button" // should be menu or return menu types?
+						"name": "askgeton",
+						"value": "askgeton",
+						"text": "Getting On?",
+						"type": "button"
 					}
 					// TODO menu type, "others"
 					// a menu drop-down of stats, status, etc
