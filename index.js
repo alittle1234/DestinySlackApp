@@ -328,7 +328,7 @@ function sendImOnAt_Start(responseURL){
 				"actions": [
 				// 1-12
 					{
-				    "name": "action_getingon_hour",
+				    "name": action_getingon_hour,
                     "text": "Hour...",
                     "type": "select",
                     "options": [
@@ -409,7 +409,7 @@ function sendImOnAt_AmPm(responseURL){
 				"actions": [
 				// am | pm
 					{
-				    "name": "action_getingon_amp",
+				    "name": action_getingon_amp,
                     "text": "AM/PM...",
                     "type": "select",
                     "options": [
@@ -450,7 +450,7 @@ function sendImOnAt_Day(responseURL){
 				"actions": [
 				// Today | Tommorow | Tuesday | Friday | Saturday | Sunday
 					{
-				    "name": "action_getingon_day",
+				    "name": action_getingon_day,
                     "text": "Day...",
                     "type": "select",
                     "options": [
