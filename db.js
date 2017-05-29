@@ -14,7 +14,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client) {
 
 function getUsers(){
 	users = [];
-	results = getDBAction(=>{
+	results = getDBAction( () =>{
 		client
 		.query('SELECT * FROM users;')
 		.on('row', function(row) {
@@ -27,8 +27,8 @@ function getUsers(){
 
 // id, name, img_url, destiny_name
 function storeUsers(users){
-	for(int i = 0; i < users.length; i++){
-		setDBAction(=>{
+	for(var i = 0; i < users.length; i++){
+		setDBAction( () =>{
 		client
 			.query('SELECT id FROM FROM users where id='+users[i].id+';')
 			.on('row', function(row) {
@@ -43,7 +43,7 @@ function storeUsers(users){
 }
 
 function insertUser(user){
-	setDBAction(=>{
+	setDBAction( () =>{
 	client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
 		'values($1, $2, $3, $4)',
 		[user.id, user.name, user.img_url, user.destiny_name]);
@@ -51,7 +51,7 @@ function insertUser(user){
 }
 
 function updateUser(user){
-	setDBAction(=>{
+	setDBAction( () =>{
 	client.query('UPDATE items SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4)',
 		[user.name, user.img_url, user.destiny_name, user.id]);
 	});
