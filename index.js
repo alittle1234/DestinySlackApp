@@ -151,7 +151,7 @@ function handleDestinyReq(req, res){
 	}catch(e){ // why doesnt this work?
 		console.error(e.message);
 		
-		console.log('payload: \n' + JSON.stringify(req, null, 2));
+		//console.log('payload: \n' + JSON.stringify(req, null, 2));
 	}
 }
 
@@ -331,13 +331,15 @@ function handleJoin(payload){
             ];
 			
 	//remove user from field if exist
-	if(message.attachments[1]){
+	if(message.attachments[1] && message.attachments[1].fields){
 		fieldsArray = message.attachments[1].fields;
 		for(f in fieldsArray){
-			var vals = f.value.split("\n");
-			for(val in vals){
-				if(val != username){
-					f.value += val + "\n";
+			if(f.value)){
+				var vals = f.value.split("\n");
+				for(val in vals){
+					if(val != username){
+						f.value += val + "\n";
+					}
 				}
 			}
 		}
