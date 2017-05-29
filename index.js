@@ -334,7 +334,7 @@ function handleJoin(payload){
 	if(message.attachments[1] && message.attachments[1].fields){
 		fieldsArray = message.attachments[1].fields;
 		for(f in fieldsArray){
-			if(f.value)){
+			if(f.value){
 				var vals = f.value.split("\n");
 				for(val in vals){
 					if(val != username){
