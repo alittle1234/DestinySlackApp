@@ -48,6 +48,7 @@ exports.getUsers = () => {
 		});
 	});
 	
+	console.log('DB Method: ' + JSON.stringify(users));
 	return users;
 };
 
