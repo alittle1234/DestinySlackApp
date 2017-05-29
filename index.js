@@ -99,7 +99,7 @@ function handleDestinyReq(req, res){
 				}
 				// MENU
 				else if(action_getingon_hour == actionName){
-					sendImOnAt_AmPm(payload.response_url), payload;
+					sendImOnAt_AmPm(payload.response_url, payload);
 				}
 				// MENU
 				else if(action_getingon_amp == actionName){
@@ -362,7 +362,51 @@ function sendImOnAt_Start(responseURL, payload){
                     "options": [
                         {
                             "text": "1:00",
-                            "value": "01"
+                            "value": "1:00"
+                        },
+						{
+                            "text": "2:00",
+                            "value": "2:00"
+                        },
+						{
+                            "text": "3:00",
+                            "value": "3:00"
+                        },
+						{
+                            "text": "4:00",
+                            "value": "4:00"
+                        },
+						{
+                            "text": "5:00",
+                            "value": "5:00"
+                        },
+						{
+                            "text": "6:00",
+                            "value": "6:00"
+                        },
+						{
+                            "text": "7:00",
+                            "value": "7:00"
+                        },
+						{
+                            "text": "8:00",
+                            "value": "8:00"
+                        },
+						{
+                            "text": "9:00",
+                            "value": "9:00"
+                        },
+						{
+                            "text": "10:00",
+                            "value": "10:00"
+                        },
+						{
+                            "text": "11:00",
+                            "value": "1:00"
+                        },
+						{
+                            "text": "12:00",
+                            "value": "12:00"
                         }
 					]
 					}
