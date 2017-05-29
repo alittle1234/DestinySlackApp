@@ -45,11 +45,11 @@ exports.getUsers = () => {
 			done();
 			// return results;
 			console.log('Done...');
+			return users;
 		});
 	});
 	
 	console.log('DB Method: ' + JSON.stringify(users));
-	return users;
 };
 
 // id, name, img_url, destiny_name
