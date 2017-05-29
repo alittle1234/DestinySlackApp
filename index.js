@@ -78,7 +78,7 @@ function handleDestinyReq(req, res){
 				}
 				
 				else if(action_onatmenu == payload.actions[0].name){
-					sendImOnAtMenu(payload, payload.user);
+					sendImOnAtMenu(payload.response_url);
 				}
 				
 				else if(action_getingon == payload.actions[0].name){
@@ -251,6 +251,7 @@ function getRequestBodyText(req){
 }
 function sendImOnAtMenu(responseURL){
 	var message = {
+		"replace_original": true,
 		"attachments": [
 			{
 				"text": "I'm On At:",
@@ -258,7 +259,6 @@ function sendImOnAtMenu(responseURL){
 				"callback_id": "destiny_imonat_menu",
 				"color": menu_color,
 				"attachment_type": "default",
-				"replace_original": true,
 				"actions": [
 				// 1200 500 8-900
 					{
