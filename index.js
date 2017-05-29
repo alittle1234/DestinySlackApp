@@ -113,6 +113,7 @@ var icon_url = "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb2
 var app_name = "Destiny App";
 var general_webhook = "https://hooks.slack.com/services/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";
 
+var menu_color = "#3AA3E3";
 var invite_color = "#31110A";
 var join_ask = "Join them?";
 
@@ -135,7 +136,7 @@ function getPlayerName(user){
 // Join them? [yes] [maybe] [no]
 function sendImOn(payload, user){
 	var username = getPlayerName(user);
-	var title = "*" + username + "*" + " is on Destiny!";
+	var title = "_*" + username + "*" + " is on Destiny!_";
 	
 	var message = {
 		"text": title,
@@ -154,8 +155,8 @@ function sendGettingOn(payload, user){
 	var day = "Today";
 	
 	var username = getPlayerName(user);
-	var title = "*" + username + "*" + " is getting on Destiny at:\n";
-	title += time + " " + day;
+	var title = "_*" + username + "*" + " is getting on Destiny at:_\n";
+	title += "*"+time + " " + day+"*";
 	
 	var message = {
 		"text": title,
@@ -163,7 +164,7 @@ function sendGettingOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			{"text": "payload: " + JSON.stringify(payload)},
+			{"text": "req payload: \n" + JSON.stringify(payload)},
 			getJoinAttachment(username)
 		]
 	}
@@ -175,7 +176,7 @@ function sendAskGetOn(payload, user){
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
 	var username = getPlayerName(user);
-	var title = "Is anyone getting on Destiny " + time + "?";
+	var title = "_*" + username + ":*" +"Is anyone getting on Destiny *" + time + "*?_";
 	
 	var message = {
 		"text": title,
@@ -183,7 +184,6 @@ function sendAskGetOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			{"text": "payload: " + JSON.stringify(payload)},
 			getJoinAttachment(username, false)
 		]
 	}
@@ -243,6 +243,166 @@ function parseText(textString){
 function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
 }
+function sendImOnAtMenu(responseURL){
+	var message = {
+		"attachments": [
+			{
+				"text": "I'm On At:",
+				"fallback": "Im On At menu",
+				"callback_id": "destiny_imonat_menu",
+				"color": menu_color,
+				"attachment_type": "default",
+				"actions": [
+				// 1200 500 8-900
+					{
+						"name": action_imon,
+						"value": "a12",
+						"text": "12:00 PM",
+						"type": "button"
+					},
+					{
+						"name": action_imon,
+						"value": "a05",
+						"text": "5:00 PM",
+						"type": "button"
+					},
+					{
+						"name": action_imon,
+						"value": "a89",
+						"text": "8-9:00 PM",
+						"type": "button"
+					}
+				]
+			},
+			getTimeMenuAttachment()
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
+}
+
+function getTimeMenuAttachment(){
+	return {
+				//"text": "Time Menu",
+				"fallback": "Time Menu",
+				"callback_id": "destiny_imonat_time_menu",
+				"color": menu_color,
+				"attachment_type": "default",
+				"actions": [
+				// 1-12
+					{
+				    "name": "time_list",
+                    "text": "Hour...",
+                    "type": "select",
+                    "options": [
+                        {
+                            "text": "1:00",
+                            "value": "01"
+                        },
+						{
+                            "text": "2:00",
+                            "value": "02"
+                        },
+						{
+                            "text": "3:00",
+                            "value": "03"
+                        },
+						{
+                            "text": "4:00",
+                            "value": "04"
+                        },
+						{
+                            "text": "5:00",
+                            "value": "05"
+                        },
+						{
+                            "text": "6:00",
+                            "value": "06"
+                        },
+						{
+                            "text": "7:00",
+                            "value": "07"
+                        },
+						{
+                            "text": "8:00",
+                            "value": "08"
+                        },
+						{
+                            "text": "9:00",
+                            "value": "09"
+                        },
+						{
+                            "text": "10:00",
+                            "value": "10"
+                        },
+						{
+                            "text": "11:00",
+                            "value": "11"
+                        },
+						{
+                            "text": "12:00",
+                            "value": "12"
+                        }
+					]
+					},
+				// am | pm
+					{
+				    "name": "ampm_list",
+                    "text": "AM/PM...",
+                    "type": "select",
+                    "options": [
+                        {
+                            "text": "AM",
+                            "value": "AM"
+                        },
+						{
+                            "text": "PM",
+                            "value": "PM"
+                        }
+					]
+					},
+					
+				// Today | Tommorow | Tuesday | Friday | Saturday | Sunday
+					{
+				    "name": "day_list",
+                    "text": "Day...",
+                    "type": "select",
+                    "options": [
+                        {
+                            "text": "Today",
+                            "value": "Today"
+                        },
+						{
+                            "text": "Tomorrow",
+                            "value": "Tomorrow"
+                        },
+						{
+                            "text": "Tuesday",
+                            "value": "Tuesday"
+                        },
+						{
+                            "text": "Friday",
+                            "value": "Friday"
+                        },
+						{
+                            "text": "Saturday",
+                            "value": "Saturday"
+                        },
+						{
+                            "text": "Sunday",
+                            "value": "Sunday"
+                        }
+					]
+					},
+				// SUBMIT
+					{
+						"name": action_imon,
+						"value": "submit custon",
+						"text": "Submit Custom",
+						"type": "button"
+					}
+				],
+			}
+}
 
 // return the basic menu as response
 function getBasicMenu(responseURL){
@@ -253,7 +413,7 @@ function getBasicMenu(responseURL){
 				"text": "Destiny Action:",
 				"fallback": "Interactive buttons need to be enabled.",
 				"callback_id": "destiny_basic",
-				"color": "#3AA3E3",// TODO destiny basic color
+				"color": menu_color,
 				"attachment_type": "default", // TODO what is this?
 				"actions": [
 					{
