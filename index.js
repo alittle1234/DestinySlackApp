@@ -191,6 +191,9 @@ function sendImOn(payload, user){
 // Join them? [yes] [maybe] [no]
 
 function sendGettingOn(payload, user){
+	// clear private message
+	clearPrivate(payload.response_url);
+	
 	var time_day = "12:00 PM Today";
 	
 	if(imon_cache[payload.user.id] && payload.actions[0].selected_options){
@@ -220,7 +223,7 @@ function sendGettingOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			{"text": "req payload: \n" + JSON.stringify(payload)},
+			//{"text": "req payload: \n" + JSON.stringify(payload)},
 			getJoinAttachment(username)
 		]
 	}
@@ -517,7 +520,17 @@ function sendImOnAt_Day(responseURL, payload){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
+function emptyMessage(){
+	return {
+		"replace_original": true,
+		"text": "",
+		"attachments": []
+	}
+}
 
+function clearPrivate(responseURL){
+	sendMessageToSlackResponseURL(responseURL, emptyMessage());
+}
 
 
 // return the basic menu as response
@@ -556,7 +569,7 @@ function getBasicMenu(responseURL){
 			}
 		]
 	}
-	sendMessageToSlackResponseURL(responseURL, message)
+	sendMessageToSlackResponseURL(responseURL, message);
 }
 
 // temp send message
