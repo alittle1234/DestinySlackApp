@@ -21,7 +21,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/users/', function(req, res) {
-	res.send(db.getUsers());
+	res.send(getUsers());
 });
 
 app.listen(app.get('port'), function() {
