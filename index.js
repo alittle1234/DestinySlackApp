@@ -80,40 +80,43 @@ function handleDestinyReq(req, res){
 			var payload;
 			if(req.body.payload){ // an action button was clicked
 				payload = JSON.parse(req.body.payload); // turn payload into json obj
+				var actionName = payload.actions[0].name;
 				
-				if(action_imon == payload.actions[0].name){
+				// SEND MESSAGE -- IM ON
+				if(action_imon == actionName){
 					sendImOn(payload, payload.user);
 				}
 				
 				
-				// MENU
-				else if(action_onatmenu == payload.actions[0].name){
+				// MENU -- ON AT...
+				else if(action_onatmenu == actionName){
 					sendImOnAt_Menu(payload.response_url, payload);
 				}
 				
 				// MENU
-				else if(action_getingon_start == payload.actions[0].name){
+				else if(action_getingon_start == actionName){
 					sendImOnAt_Start(payload.response_url, payload);
 				}
 				// MENU
-				else if(action_getingon_hour == payload.actions[0].name){
+				else if(action_getingon_hour == actionName){
 					sendImOnAt_AmPm(payload.response_url), payload;
 				}
 				// MENU
-				else if(action_getingon_amp == payload.actions[0].name){
+				else if(action_getingon_amp == actionName){
 					sendImOnAt_Day(payload.response_url, payload);
 				}
-				// SEND MESSAGE
-				else if(action_getingon_day == payload.actions[0].name){
+				// SEND MESSAGE -- ON AT...
+				else if(action_getingon_day == actionName){
 					sendGettingOn(payload, payload.user);
 				}
 				
-				else if(action_getingon == payload.actions[0].name){
+				// SEND MESSAGE -- ON AT...
+				else if(action_getingon == actionName){
 					sendGettingOn(payload, payload.user);
 				}
 				
 				
-				else if(action_askgeton == payload.actions[0].name){
+				else if(action_askgeton == actionName){
 					sendAskGetOn(payload, payload.user);
 				}
 				
@@ -190,10 +193,10 @@ function sendImOn(payload, user){
 function sendGettingOn(payload, user){
 	var time_day = "12:00 PM Today";
 	
-	if(imon_cache[payload.user.id] && payload.actions.selected_options){
-		time_day = imon_cache[payload.user.id] + " " + payload.actions.selected_options.value;
+	if(imon_cache[payload.user.id] && payload.actions[0].selected_options){
+		time_day = imon_cache[payload.user.id] + " " + payload.actions[0].selected_options[0].value;
 	}else{
-		var option = payload.actions.value;
+		var option = payload.actions[0].value;
 		if(option == "a12"){ // TODO change these to the literal values
 			time_day = "12:00 PM Today";
 		}else if(option == "a05"){
@@ -415,7 +418,7 @@ function sendImOnAt_Start(responseURL, payload){
 }
 
 function sendImOnAt_AmPm(responseURL, payload){
-	imon_cache[payload.user.id] = payload.actions.selected_options.value;
+	imon_cache[payload.user.id] = payload.actions[0].selected_options[0].value;
 	var message = {
 		"replace_original": true,
 		"attachments": [
@@ -457,7 +460,7 @@ function sendImOnAt_AmPm(responseURL, payload){
 }
 
 function sendImOnAt_Day(responseURL, payload){
-	imon_cache[payload.user.id] += " " + payload.actions.selected_options.value;
+	imon_cache[payload.user.id] += " " + payload.actions[0].selected_options[0].value;
 	var message = {
 		"replace_original": true,
 		"attachments": [
