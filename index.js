@@ -351,6 +351,8 @@ function handleJoin(payload){
 	message.replace_original = true;
 	
 	sendMessageToSlackResponseURL(payload.response_url, message);
+	
+	console.log('payload: \n' + JSON.stringify(payload, null, 2));
 }
 
 
