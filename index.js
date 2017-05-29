@@ -51,6 +51,8 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 });
 
 var action_imon = "imon";
+var action_getingon = "getgonat";
+var action_askgeton = "askgeton";
 
 // handle all the destiny app requests
 function handleDestinyReq(req, res){
@@ -70,8 +72,18 @@ function handleDestinyReq(req, res){
 				payload = JSON.parse(req.body.payload); // turn payload into json obj
 				
 				if(action_imon == payload.actions[0].name){
-					doImOn(payload, payload.user);
-				}else{
+					sendImOn(payload, payload.user);
+				}
+				
+				else if(action_getingon == payload.actions[0].name){
+					sendGettingOn(payload, payload.user);
+				}
+				
+				else if(action_askgeton == payload.actions[0].name){
+					sendAskGetOn(payload, payload.user);
+				}
+				
+				else{
 					var message = {
 						"text": payload.user.name+" clicked: "+payload.actions[0].name,
 						"replace_original": false
@@ -121,7 +133,7 @@ function getPlayerName(user){
 // PetterNincompoop is on Destiny!
 // [image] [timestamp?] [activity?]
 // Join them? [yes] [maybe] [no]
-function doImOn(payload, user){
+function sendImOn(payload, user){
 	var username = getPlayerName(user);
 	var title = "*" + username + "*" + " is on Destiny!";
 	
@@ -137,9 +149,51 @@ function doImOn(payload, user){
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
-function getJoinAttachment(username){
+function sendGettingOn(payload, user){
+	var time = "12:00 PM";
+	var day = "Today";
+	
+	var username = getPlayerName(user);
+	var title = "*" + username + "*" + " is getting on Destiny at:\n";
+	title += time + " " + day;
+	
+	var message = {
+		"text": title,
+		"username": app_name,
+		"icon_url": icon_url,
+		"replace_original": true,
+		"attachments": [
+			{"text": "payload: " + JSON.stringify(payload)},
+			getJoinAttachment(username)
+		]
+	}
+	sendMessageToSlackResponseURL(general_webhook, message);
+}
+
+// this one is kind of pointless?
+function sendAskGetOn(payload, user){
+	var time = "Today"; // Tonight | Tommorow | this Weekend
+	
+	var username = getPlayerName(user);
+	var title = "Is anyone getting on Destiny " + time + "?";
+	
+	var message = {
+		"text": title,
+		"username": app_name,
+		"icon_url": icon_url,
+		"replace_original": true,
+		"attachments": [
+			{"text": "payload: " + JSON.stringify(payload)},
+			getJoinAttachment(username, false)
+		]
+	}
+	sendMessageToSlackResponseURL(general_webhook, message);
+}
+
+
+function getJoinAttachment(username, ask=true){
 	return {
-				"text": join_ask,
+				"text": ask ? join_ask : "",
 				"fallback": "Join " + username + " on Destiny?",
 				"callback_id": join_im_on_callback,
 				"color": invite_color,
@@ -209,14 +263,14 @@ function getBasicMenu(responseURL){
 						"type": "button"
 					},
 					{
-						"name": "getgonat",
-						"value": "getgonat",
+						"name": action_getingon,
+						"value": action_getingon,
 						"text": "I'm On At:",
 						"type": "button"
 					},
 					{
-						"name": "askgeton",
-						"value": "askgeton",
+						"name": action_askgeton,
+						"value": action_askgeton,
 						"text": "Getting On?",
 						"type": "button"
 					}
