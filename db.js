@@ -17,7 +17,7 @@ exports.getUsers = () => {
 	console.log('Get Users...');
 	
 	
-	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
+	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 		console.log('Connecting...');
 		const results = [];
 		// Handle connection errors
@@ -32,6 +32,7 @@ exports.getUsers = () => {
 		const query = client
 						.query('SELECT * FROM users;')
 						.on('row', function(row) {
+							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
 							users[row.id] = row;
 						});
@@ -45,6 +46,7 @@ exports.getUsers = () => {
 			done();
 			// return results;
 			console.log('Done...');
+			console.log('Done Method: ' + JSON.stringify(users));
 			return users;
 		});
 	});
