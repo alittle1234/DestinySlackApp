@@ -58,7 +58,7 @@ function updateUser(user){
 }
 
 function getDBAction(queryMethod){
-	pg.connect(connectionString, (err, client, done) => {
+	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
 		const results = [];
 		// Handle connection errors
 		if(err) {
@@ -83,7 +83,7 @@ function getDBAction(queryMethod){
 }
 
 function setDBAction(queryMethod){
-	pg.connect(connectionString, (err, client, done) => {
+	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
 		// Handle connection errors
 		if(err) {
 			done();
