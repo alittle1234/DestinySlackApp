@@ -122,7 +122,8 @@ function handleDestinyReq(req, res){
 				
 				else{
 					var message = {
-						"text": payload.user.name+" clicked: "+payload.actions[0].name,
+						"text": payload.user.name+" clicked: "+payload.actions[0].name +"\n"
+						 + JSON.stringify(payload, null, 2),
 						"replace_original": false
 					}
 					sendMessageToSlackResponseURL(payload.response_url, message);
@@ -335,7 +336,7 @@ function sendImOnAt_Menu(responseURL, payload){
 					{
 						"name": action_getingon_start,
 						"value": "submit custon",
-						"text": "Submit Custom",
+						"text": "Custom Time",
 						"type": "button"
 					}
 				]
