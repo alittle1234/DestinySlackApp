@@ -343,11 +343,17 @@ function handleJoin(payload){
 		for (var i = 0; i < fieldsArray.length; i++) {
 			if(fieldsArray[i].value){
 				var vals = fieldsArray[i].value.split("\n");
+				// reset field value property
 				fieldsArray[i].value = "";
 				for (var k = 0; k < vals.length; k++) {
-					if(vals[k] != username){
-						fieldsArray[i].value += vals[k] + "\n";
+					var v = vals[k];
+					if(v){
+						v = v.replace("\n", "").trim();
+						if(v && v != username && v.length > 0){
+							fieldsArray[i].value += v + "\n";
+						}
 					}
+					
 				}
 			}
 		}
