@@ -14,9 +14,11 @@ pg.connect(process.env.DATABASE_URL, function(err, client) {
 
 exports.getUsers = () => {
 	users = [];
+	console.log('Get Users...');
 	
 	
 	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
+		console.log('Connecting...');
 		const results = [];
 		// Handle connection errors
 		if(err) {
@@ -26,6 +28,7 @@ exports.getUsers = () => {
 		}
 		
 		// SQL Query > Select Data
+		console.log('Run Query...');
 		const query = client
 						.query('SELECT * FROM users;')
 						.on('row', function(row) {
@@ -33,15 +36,15 @@ exports.getUsers = () => {
 							users[row.id] = row;
 						});
 		
-		// Stream results back one row at a time
-		query.on('row', (row) => {
-			results.push(row);
-		});
+		
 		
 		// After all data is returned, close connection and return results
+		
+		console.log('Finish...');
 		query.on('end', () => {
 			done();
 			// return results;
+			console.log('Done...');
 		});
 	});
 	
