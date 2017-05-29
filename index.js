@@ -402,7 +402,7 @@ function getTimeMenuAttachment(){
 					},
 				// SUBMIT
 					{
-						"name": action_imon,
+						"name": action_getingon,
 						"value": "submit custon",
 						"text": "Submit Custom",
 						"type": "button"
