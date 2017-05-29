@@ -52,7 +52,9 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 
 var action_imon = "imon";
 var action_getingon = "getgonat";
+var action_onatmenu = "onatmenu";
 var action_askgeton = "askgeton";
+
 
 // handle all the destiny app requests
 function handleDestinyReq(req, res){
@@ -73,6 +75,10 @@ function handleDestinyReq(req, res){
 				
 				if(action_imon == payload.actions[0].name){
 					sendImOn(payload, payload.user);
+				}
+				
+				else if(action_onatmenu == payload.actions[0].name){
+					sendImOnAtMenu(payload, payload.user);
 				}
 				
 				else if(action_getingon == payload.actions[0].name){
@@ -252,6 +258,7 @@ function sendImOnAtMenu(responseURL){
 				"callback_id": "destiny_imonat_menu",
 				"color": menu_color,
 				"attachment_type": "default",
+				"replace_original": true,
 				"actions": [
 				// 1200 500 8-900
 					{
@@ -423,8 +430,8 @@ function getBasicMenu(responseURL){
 						"type": "button"
 					},
 					{
-						"name": action_getingon,
-						"value": action_getingon,
+						"name": action_onatmenu,
+						"value": action_onatmenu,
 						"text": "I'm On At:",
 						"type": "button"
 					},
