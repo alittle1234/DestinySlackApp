@@ -51,6 +51,8 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 });
 
 var action_imon = "imon";
+
+var imon_cache = [];
 var action_getingon = "getingonat";
 
 var action_onatmenu = "onatmenu";
@@ -181,12 +183,28 @@ function sendImOn(payload, user){
 // Join them? [yes] [maybe] [no]
 
 function sendGettingOn(payload, user){
-	var time = "12:00 PM";
-	var day = "Today";
+	var time_day = "12:00 PM Today";
+	
+	if(imon_cache[payload.user.id] && payload.actions.selected_options){
+		time_day = imon_cache[payload.user.id] + " " + payload.actions.selected_options.value;
+	}else{
+		var option = payload.actions.value;
+		if(option == "a12"){ // TODO change these to the literal values
+			time_day = "12:00 PM Today";
+		}else if(option == "a05"){
+			time_day = "5:00 PM Today";
+		}else if(option == "a89"){
+			time_day = "8-9:00 PM Today";
+		}else{
+			time_day = "Sometime Today";
+		}
+	}
+	
+	imon_cache[payload.user.id] = null;
 	
 	var username = getPlayerName(user);
 	var title = "_*" + username + "*" + " is getting on Destiny at:_\n";
-	title += "*"+time + " " + day+"*";
+	title += "*"+time_day+"*";
 	
 	var message = {
 		"text": title,
@@ -272,6 +290,7 @@ function getRequestBodyText(req){
 }
 
 function sendImOnAt_Menu(responseURL){
+	imon_cache[payload.user.id] = null;
 	var message = {
 		"replace_original": true,
 		"attachments": [
@@ -315,7 +334,8 @@ function sendImOnAt_Menu(responseURL){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-function sendImOnAt_Start(responseURL){
+function sendImOnAt_Start(responseURL, payload){
+	imon_cache[payload.user.id] = "";
 	var message = {
 		"replace_original": true,
 		"attachments": [
@@ -334,60 +354,53 @@ function sendImOnAt_Start(responseURL){
                     "options": [
                         {
                             "text": "1:00",
-                            "value": "01"
+                            "value": "1:00"
                         },
 						{
                             "text": "2:00",
-                            "value": "02"
+                            "value": "2:00"
                         },
 						{
                             "text": "3:00",
-                            "value": "03"
+                            "value": "3:00"
                         },
 						{
                             "text": "4:00",
-                            "value": "04"
+                            "value": "4:00"
                         },
 						{
                             "text": "5:00",
-                            "value": "05"
+                            "value": "5:00"
                         },
 						{
                             "text": "6:00",
-                            "value": "06"
+                            "value": "6:00"
                         },
 						{
                             "text": "7:00",
-                            "value": "07"
+                            "value": "7:00"
                         },
 						{
                             "text": "8:00",
-                            "value": "08"
+                            "value": "8:00"
                         },
 						{
                             "text": "9:00",
-                            "value": "09"
+                            "value": "9:00"
                         },
 						{
                             "text": "10:00",
-                            "value": "10"
+                            "value": "10:00"
                         },
 						{
                             "text": "11:00",
-                            "value": "11"
+                            "value": "1:00"
                         },
 						{
                             "text": "12:00",
-                            "value": "12"
+                            "value": "12:00"
                         }
 					]
-					},
-				// SUBMIT
-					{
-						"name": action_getingon_start,
-						"value": "submit custon",
-						"text": "Re-select",
-						"type": "button"
 					}
 				]
 			}
@@ -397,11 +410,12 @@ function sendImOnAt_Start(responseURL){
 }
 
 function sendImOnAt_AmPm(responseURL){
+	imon_cache[payload.user.id] = payload.actions.selected_options.value;
 	var message = {
 		"replace_original": true,
 		"attachments": [
 			{
-				"text": "I'm On At:",
+				"text": "I'm On At:" + "\n" + imon_cache[payload.user.id],
 				"fallback": "Im On At menu",
 				"callback_id": "destiny_imonat_menu",
 				"color": menu_color,
@@ -438,11 +452,12 @@ function sendImOnAt_AmPm(responseURL){
 }
 
 function sendImOnAt_Day(responseURL){
+	imon_cache[payload.user.id] += " " + payload.actions.selected_options.value;
 	var message = {
 		"replace_original": true,
 		"attachments": [
 			{
-				"text": "I'm On At:",
+				"text": "I'm On At:" + "\n" + imon_cache[payload.user.id],
 				"fallback": "Im On At menu",
 				"callback_id": "destiny_imonat_menu",
 				"color": menu_color,
