@@ -1,18 +1,8 @@
 var pg = require('pg');
-
 pg.defaults.ssl = true;
-pg.connect(process.env.DATABASE_URL, function(err, client) {
-  if (err) throw err;
-  console.log('Connected to postgres! Getting schemas...');
 
-  // client
-    // .query('SELECT table_schema,table_name FROM information_schema.tables;')
-    // .on('row', function(row) {
-      // console.log(JSON.stringify(row));
-    // });
-});
 
-exports.getUsers = () => {
+module.exports.getUsers = function() {
 	users = [];
 	console.log('Get Users...');
 	
@@ -47,11 +37,11 @@ exports.getUsers = () => {
 			// return results;
 			console.log('Done...');
 			console.log('Done Method: ' + JSON.stringify(users));
-			return users;
 		});
 	});
 	
 	console.log('DB Method: ' + JSON.stringify(users));
+	return users;
 };
 
 // id, name, img_url, destiny_name
