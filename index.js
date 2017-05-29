@@ -333,15 +333,16 @@ function handleJoin(payload){
 	//remove user from field if exist
 	if(message.attachments[1] && message.attachments[1].fields){
 		fieldsArray = message.attachments[1].fields;
-		for(f in fieldsArray){
-			if(f.value){
-				console.log('fval: ' + f.value + ' --end');
-				var vals = f.value.split("\n");
+		console.log('farray: \n' + fieldsArray);
+		for (var i = 0; i < fieldsArray.length; i++) {
+			if(fieldsArray[i].value){
+				console.log('fval: ' + fieldsArray[i].value + ' --end');
+				var vals = fieldsArray[i].value.split("\n");
 				console.log('vals: ' + vals + ' --end');
-				f.value = "";
-				for(val in vals){
-					if(val != username){
-						f.value += val + "\n";
+				fieldsArray[i].value = "";
+				for (var k = 0; k < vals.length; k++) {
+					if(vals[k] != username){
+						fieldsArray[i].value += vals[k] + "\n";
 					}
 				}
 			}
