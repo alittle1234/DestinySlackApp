@@ -25,14 +25,10 @@ app.listen(app.get('port'), function() {
 // https://polar-island-85982.herokuapp.com/
 
 
-// should the response inlcude the request
-var log = true;
-
 // end point for /d command
 app.post('/d', urlencodedParser, function(req, res) {
-	//+ req.params.join(",")
-	
     if (!req.body) {
+		console.error('no req body' + req);
 		return res.sendStatus(400);
 	}
 		
@@ -41,9 +37,8 @@ app.post('/d', urlencodedParser, function(req, res) {
 
 // endpoint for button actions
 app.post('/d/actions', urlencodedParser, function(req, res) {
-	//+ req.params.join(",")
-	
     if (!req.body) {
+		console.error('no req body' + req);
 		return res.sendStatus(400);
 	}
 	
@@ -74,9 +69,16 @@ function handleDestinyReq(req, res){
 		if(req.body){
 			var reqBody = req.body;
 			
-			var log = getRequestBodyText(req); // TODO append log to all responses when log is true
+			// TODO parse text from bot slash
+			// var textData = parseText(req.body.text);
 			
-			var textData = parseText(req.body.text);
+			// TODO add user name / id link
+			// TODO add user id -> img url db
+			// TODO add user update paths (name,img url) if not exist, add
+			// TODO add bot, text scaning
+			// TODO complete anyone getting on?
+			// TODO move methods to classes?
+			// TODO add ACTIVITY types (raid, pvp, pve, trials)
 			
 			var payload;
 			if(req.body.payload){ // an action button was clicked
@@ -135,20 +137,17 @@ function handleDestinyReq(req, res){
 					sendMessageToSlackResponseURL(payload.response_url, message);
 				}
 			}else{
-				// test send interactive message
-				//sendMessage(reqBody.response_url);
 				
 				// TODO check action... was basic menu?
-				getBasicMenu(reqBody.response_url);
+				sendBasicMenu(reqBody.response_url);
 				
 				// parse text
 				// perform action
-				// add "log"
 			}
 		}else{
 			concat += ' NO BODY ';
 		}
-	}catch(e){ // why doesnt this work?
+	}catch(e){
 		console.error(e.message);
 		
 		//console.log('payload: \n' + JSON.stringify(req, null, 2));
@@ -176,11 +175,16 @@ function getPlayerName(user){
 	return user.name;
 }
 
-// i'm on
-// PetterNincompoop is on Destiny!
-// [image] [timestamp?] [activity?]
-// Join them? [yes] [maybe] [no]
+/* sends a "Player is on!" message
+*
+*	PetterNincompoop is on Destiny!
+*	Join them? [yes] [maybe] [no]
+*
+*/
 function sendImOn(payload, user){
+	// clear private message
+	clearPrivate(payload.response_url);
+	
 	var username = getPlayerName(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
 	
@@ -196,28 +200,20 @@ function sendImOn(payload, user){
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
-// raid tonight|tommorow ?
-// Join them? [yes] [maybe] [no]
-
+/* send a "getting on at..." message
+* 	can be result of specific time buttons or
+* 	result of cache menu responses
+*/
 function sendGettingOn(payload, user){
 	// clear private message
 	clearPrivate(payload.response_url);
 	
-	var time_day = "12:00 PM Today";
+	var time_day = "Sometime Today";
 	
 	if(imon_cache[payload.user.id] && payload.actions[0].selected_options){
 		time_day = imon_cache[payload.user.id] + " " + payload.actions[0].selected_options[0].value;
 	}else{
-		var option = payload.actions[0].value;
-		if(option == "a12"){ // TODO change these to the literal values
-			time_day = "12:00 PM Today";
-		}else if(option == "a05"){
-			time_day = "5:00 PM Today";
-		}else if(option == "a89"){
-			time_day = "8-9:00 PM Today";
-		}else{
-			time_day = "Sometime Today";
-		}
+		time_day = payload.actions[0].value;
 	}
 	
 	imon_cache[payload.user.id] = null;
@@ -241,10 +237,13 @@ function sendGettingOn(payload, user){
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
-// this one is kind of pointless?
-// anyone getting on
-// Join them? [yes] [maybe] [no]
+/* send a "anyone getting on?" message
+* 	TODO not fully implemented
+*/
 function sendAskGetOn(payload, user){
+	// clear private message
+	clearPrivate(payload.response_url);
+	
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
 	var username = getPlayerName(user);
@@ -262,7 +261,9 @@ function sendAskGetOn(payload, user){
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
-
+/* 	the join question attachment for orginal message posts
+* 	buttons triger the 'join' action whcih updates the poll results
+*/
 function getJoinAttachment(username, ask=true){
 	return {
 				"text": ask ? join_ask : "",
@@ -295,6 +296,8 @@ function getJoinAttachment(username, ask=true){
 			}
 }
 
+/* the "poll results" attachment with fields
+*/
 function getPollAttachment(fieldArray){
 	return {
 				
@@ -304,14 +307,18 @@ function getPollAttachment(fieldArray){
 			}
 }
 
+/* 	handles join action for all join attachments
+* 	join poll becomes second attachment to all messages
+*	contains the names of users who clicked yes, no, maybe 
+*/
 function handleJoin(payload){
-	console.log('payload: \n' + JSON.stringify(payload, null, 2));
-	
+	//console.log('payload: \n' + JSON.stringify(payload, null, 2));
+	// get message as original message
 	var message = payload.original_message;
 	
 	var username = payload.user.name;
 	var choice = payload.actions[0].value;
-	//"fields":
+	// "fields":
 	var fieldsArray =  [
                 {
                     "title": "Yes",
@@ -330,15 +337,12 @@ function handleJoin(payload){
                 }
             ];
 			
-	//remove user from field if exist
+	// remove user from field if exist
 	if(message.attachments[1] && message.attachments[1].fields){
 		fieldsArray = message.attachments[1].fields;
-		console.log('farray: \n' + fieldsArray);
 		for (var i = 0; i < fieldsArray.length; i++) {
 			if(fieldsArray[i].value){
-				console.log('fval: ' + fieldsArray[i].value + ' --end');
 				var vals = fieldsArray[i].value.split("\n");
-				console.log('vals: ' + vals + ' --end');
 				fieldsArray[i].value = "";
 				for (var k = 0; k < vals.length; k++) {
 					if(vals[k] != username){
@@ -349,6 +353,7 @@ function handleJoin(payload){
 		}
 	}
 	
+	// add user to chosen field
 	var fieldNum = 0;
 	if(choice == "maybe"){
 		fieldNum = 1;
@@ -357,9 +362,12 @@ function handleJoin(payload){
 	}
 	fieldsArray[fieldNum].value += username + "\n";
 	
+	// set second attachment as fields
 	message.attachments[1] = getPollAttachment(fieldsArray);
+	// replace original
 	message.replace_original = true;
 	
+	// send message to response
 	sendMessageToSlackResponseURL(payload.response_url, message);
 }
 
@@ -378,6 +386,10 @@ function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
 }
 
+/* 
+*	sent the menu for the "im on at..."
+* 	has static button options and 'custom' drop-down menu options
+*/
 function sendImOnAt_Menu(responseURL, payload){
 	imon_cache[payload.user.id] = null;
 	var message = {
@@ -393,23 +405,23 @@ function sendImOnAt_Menu(responseURL, payload){
 				// 1200 500 8-900
 					{
 						"name": action_getingon,
-						"value": "a12",
+						"value": "12:00 PM Today",
 						"text": "12:00 PM",
 						"type": "button"
 					},
 					{
 						"name": action_getingon,
-						"value": "a05",
+						"value": "5:00 PM Today",
 						"text": "5:00 PM",
 						"type": "button"
 					},
 					{
 						"name": action_getingon,
-						"value": "a89",
+						"value": "8-9:00 PM Today",
 						"text": "8-9:00 PM",
 						"type": "button"
 					},
-				// SUBMIT
+				// start custom time sequence
 					{
 						"name": action_getingon_start,
 						"value": "submit custon",
@@ -526,7 +538,7 @@ function sendImOnAt_AmPm(responseURL, payload){
                         }
 					]
 					},
-				// SUBMIT
+				// re-starts custom time sequence
 					{
 						"name": action_getingon_start,
 						"value": "submit custon",
@@ -584,7 +596,7 @@ function sendImOnAt_Day(responseURL, payload){
                         }
 					]
 					},
-				// SUBMIT
+				// re-starts custom time sequence
 					{
 						"name": action_getingon_start,
 						"value": "submit custon",
@@ -598,7 +610,10 @@ function sendImOnAt_Day(responseURL, payload){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-
+/* 
+*	replaces the original private app message with "message posted"
+* 	so that the buttons cannot be pressed again and takes up less space
+*/
 function clearPrivate(responseURL){
 	var message = {
 		"replace_original": true,
@@ -608,17 +623,18 @@ function clearPrivate(responseURL){
 }
 
 
-// return the basic menu as response
-function getBasicMenu(responseURL){
+/* 
+*	the basic menu
+*/
+function sendBasicMenu(responseURL){
 	var message = {
-		//"text": "This is your first interactive message",
 		"attachments": [
 			{
-				"text": "Destiny Action:",
-				"fallback": "Interactive buttons need to be enabled.",
+				"text": "Choose an action:",
+				"fallback": "Basic Destiny App Menu",
 				"callback_id": "destiny_basic",
 				"color": menu_color,
-				"attachment_type": "default", // TODO what is this?
+				"attachment_type": "default",
 				"actions": [
 					{
 						"name": action_imon,
@@ -686,7 +702,9 @@ function sendMessage(responseURL){
 }
 
 
-// send a message to slack url
+/* 
+*	send the JSONmessage as POST to the responseURL
+*/
 function sendMessageToSlackResponseURL(responseURL, JSONmessage){
     var postOptions = {
         uri: responseURL,
@@ -698,7 +716,7 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
     }
     request(postOptions, (error, response, body) => {
         if (error){
-            // handle errors as you see fit
+            console.error(error);
         }
     })
 }
