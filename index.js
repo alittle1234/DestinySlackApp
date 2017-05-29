@@ -51,6 +51,7 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 });
 
 var action_imon = "imon";
+var action_join = "join";
 
 var imon_cache = [];
 var action_getingon = "getingonat";
@@ -118,6 +119,11 @@ function handleDestinyReq(req, res){
 				
 				else if(action_askgeton == actionName){
 					sendAskGetOn(payload, payload.user);
+				}
+				
+				// JOIN ACTION
+				else if(action_join == actionName){
+					handleJoin(payload);
 				}
 				
 				else{
@@ -224,10 +230,12 @@ function sendGettingOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			//{"text": "req payload: \n" + JSON.stringify(payload)},
 			getJoinAttachment(username)
 		]
-	}
+	};
+	
+			//{"text": "req payload: \n" + JSON.stringify(payload)},
+			
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
@@ -264,26 +272,85 @@ function getJoinAttachment(username, ask=true){
 
 				"actions": [
 					{
-						"name": "yes",
+						"name": action_join,
 						"value": "yes",
 						"text": "Yes",
 						"type": "button"
 					},
 					{
-						"name": "maybe",
+						"name": action_join,
 						"value": "maybe",
 						"text": "Maybe",
 						"type": "button"
 					},
 					{
-						"name": "no",
+						"name": action_join,
 						"value": "no",
 						"text": "No",
 						"type": "button"
 					}
-					// TODO need to handle "poll" actions
 				]
 			}
+}
+
+function getPollAttachment(fieldArray){
+	return {
+				
+				"fallback": "Join Poll",
+				"color": invite_color,
+				"fields": fieldArray
+			}
+}
+
+function handleJoin(payload){
+	var message = payload.original_message;
+	
+	var username = payload.user.name;
+	var choice = payload.actions[0].value;
+	//"fields":
+	var fieldsArray =  [
+                {
+                    "title": "Yes",
+                    "value": "",
+                    "short": true
+                },
+				{
+                    "title": "Maybe",
+                    "value": "",
+                    "short": true
+                },
+				{
+                    "title": "No",
+                    "value": "",
+                    "short": true
+                }
+            ];
+			
+	//remove user from field if exist
+	if(message.attachments[1]){
+		fieldsArray = message.attachments[1].fields;
+		for(f in fieldsArray){
+			var vals = f.value.split("\n");
+			for(val in vals){
+				if(val != username){
+					f.value += val + "\n";
+				}
+			}
+		}
+	}
+	
+	var fieldNum = 0;
+	if(choice == "maybe"){
+		fieldNum = 1;
+	}else if(choice == "no"){
+		fieldNum = 2;
+	}
+	fieldsArray[fieldNum].value += username + "\n";
+	
+	message.attachments[1] = getPollAttachment(fieldsArray);
+	message.replace_original = true;
+	
+	sendMessageToSlackResponseURL(payload.response_url, message);
 }
 
 
