@@ -14,13 +14,36 @@ pg.connect(process.env.DATABASE_URL, function(err, client) {
 
 exports.getUsers = () => {
 	users = [];
-	results = getDBAction( () => {
-		client
-		.query('SELECT * FROM users;')
-		.on('row', function(row) {
-			console.log(JSON.stringify(row));
-			users[row.id] = row;
-	});});
+	
+	
+	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
+		const results = [];
+		// Handle connection errors
+		if(err) {
+			done();
+			console.log(err);
+			return res.status(500).json({success: false, data: err});
+		}
+		
+		// SQL Query > Select Data
+		const query = client
+						.query('SELECT * FROM users;')
+						.on('row', function(row) {
+							console.log(JSON.stringify(row));
+							users[row.id] = row;
+						});
+		
+		// Stream results back one row at a time
+		query.on('row', (row) => {
+			results.push(row);
+		});
+		
+		// After all data is returned, close connection and return results
+		query.on('end', () => {
+			done();
+			// return results;
+		});
+	});
 	
 	return users;
 };
