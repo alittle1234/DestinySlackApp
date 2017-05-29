@@ -51,8 +51,14 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 });
 
 var action_imon = "imon";
-var action_getingon = "getgonat";
+var action_getingon = "getingonat";
+
 var action_onatmenu = "onatmenu";
+var action_getingon_start = "onat_start";
+var action_getingon_hour = "onat_hour";
+var action_getingon_amp = "onat_ampm";
+var action_getingon_day = "onat_day";
+
 var action_askgeton = "askgeton";
 
 
@@ -77,13 +83,28 @@ function handleDestinyReq(req, res){
 					sendImOn(payload, payload.user);
 				}
 				
+				
 				else if(action_onatmenu == payload.actions[0].name){
-					sendImOnAtMenu(payload.response_url);
+					sendImOnAt_Menu(payload.response_url);
+				}
+				
+				else if(action_getingon_start == payload.actions[0].name){
+					sendImOnAt_Start(payload.response_url);
+				}
+				else if(action_getingon_hour == payload.actions[0].name){
+					sendImOnAt_AmPm(payload.response_url);
+				}
+				else if(action_getingon_amp == payload.actions[0].name){
+					sendImOnAt_Day(payload.response_url);
+				}
+				else if(action_getingon_day == payload.actions[0].name){
+					sendGettingOn(payload, payload.user);
 				}
 				
 				else if(action_getingon == payload.actions[0].name){
 					sendGettingOn(payload, payload.user);
 				}
+				
 				
 				else if(action_askgeton == payload.actions[0].name){
 					sendAskGetOn(payload, payload.user);
@@ -156,6 +177,9 @@ function sendImOn(payload, user){
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
 
+// raid tonight|tommorow ?
+// Join them? [yes] [maybe] [no]
+
 function sendGettingOn(payload, user){
 	var time = "12:00 PM";
 	var day = "Today";
@@ -178,6 +202,8 @@ function sendGettingOn(payload, user){
 }
 
 // this one is kind of pointless?
+// anyone getting on
+// Join them? [yes] [maybe] [no]
 function sendAskGetOn(payload, user){
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
@@ -229,11 +255,6 @@ function getJoinAttachment(username, ask=true){
 				]
 			}
 }
-// anyone getting on
-// Join them? [yes] [maybe] [no]
-
-// raid tonight|tommorow ?
-// Join them? [yes] [maybe] [no]
 
 
 // get the 'command' sent... should be if /d is used in conj w another
@@ -249,7 +270,8 @@ function parseText(textString){
 function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
 }
-function sendImOnAtMenu(responseURL){
+
+function sendImOnAt_Menu(responseURL){
 	var message = {
 		"replace_original": true,
 		"attachments": [
@@ -262,42 +284,51 @@ function sendImOnAtMenu(responseURL){
 				"actions": [
 				// 1200 500 8-900
 					{
-						"name": action_imon,
+						"name": action_getingon,
 						"value": "a12",
 						"text": "12:00 PM",
 						"type": "button"
 					},
 					{
-						"name": action_imon,
+						"name": action_getingon,
 						"value": "a05",
 						"text": "5:00 PM",
 						"type": "button"
 					},
 					{
-						"name": action_imon,
+						"name": action_getingon,
 						"value": "a89",
 						"text": "8-9:00 PM",
 						"type": "button"
+					},
+				// SUBMIT
+					{
+						"name": action_getingon_start,
+						"value": "submit custon",
+						"text": "Submit Custom",
+						"type": "button"
 					}
 				]
-			},
-			getTimeMenuAttachment()
+			}
 		]
 	}
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-function getTimeMenuAttachment(){
-	return {
-				//"text": "Time Menu",
-				"fallback": "Time Menu",
-				"callback_id": "destiny_imonat_time_menu",
+function sendImOnAt_Start(responseURL){
+	var message = {
+		"replace_original": true,
+		"attachments": [
+			{
+				"text": "I'm On At:",
+				"fallback": "Im On At menu",
+				"callback_id": "destiny_imonat_menu",
 				"color": menu_color,
 				"attachment_type": "default",
 				"actions": [
 				// 1-12
 					{
-				    "name": "time_list",
+				    "name": "action_getingon_hour",
                     "text": "Hour...",
                     "type": "select",
                     "options": [
@@ -351,9 +382,34 @@ function getTimeMenuAttachment(){
                         }
 					]
 					},
+				// SUBMIT
+					{
+						"name": action_getingon_start,
+						"value": "submit custon",
+						"text": "Re-select",
+						"type": "button"
+					}
+				]
+			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
+}
+
+function sendImOnAt_AmPm(responseURL){
+	var message = {
+		"replace_original": true,
+		"attachments": [
+			{
+				"text": "I'm On At:",
+				"fallback": "Im On At menu",
+				"callback_id": "destiny_imonat_menu",
+				"color": menu_color,
+				"attachment_type": "default",
+				"actions": [
 				// am | pm
 					{
-				    "name": "ampm_list",
+				    "name": "action_getingon_amp",
                     "text": "AM/PM...",
                     "type": "select",
                     "options": [
@@ -367,10 +423,34 @@ function getTimeMenuAttachment(){
                         }
 					]
 					},
-					
+				// SUBMIT
+					{
+						"name": action_getingon_start,
+						"value": "submit custon",
+						"text": "Re-select",
+						"type": "button"
+					}
+				]
+			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
+}
+
+function sendImOnAt_Day(responseURL){
+	var message = {
+		"replace_original": true,
+		"attachments": [
+			{
+				"text": "I'm On At:",
+				"fallback": "Im On At menu",
+				"callback_id": "destiny_imonat_menu",
+				"color": menu_color,
+				"attachment_type": "default",
+				"actions": [
 				// Today | Tommorow | Tuesday | Friday | Saturday | Sunday
 					{
-				    "name": "day_list",
+				    "name": "action_getingon_day",
                     "text": "Day...",
                     "type": "select",
                     "options": [
@@ -402,14 +482,20 @@ function getTimeMenuAttachment(){
 					},
 				// SUBMIT
 					{
-						"name": action_getingon,
+						"name": action_getingon_start,
 						"value": "submit custon",
-						"text": "Submit Custom",
+						"text": "Re-select",
 						"type": "button"
 					}
-				],
+				]
 			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message)
 }
+
+
+
 
 // return the basic menu as response
 function getBasicMenu(responseURL){
