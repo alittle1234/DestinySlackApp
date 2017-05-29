@@ -149,7 +149,9 @@ function handleDestinyReq(req, res){
 			concat += ' NO BODY ';
 		}
 	}catch(e){ // why doesnt this work?
-		concat = e.message;
+		console.error(e.message);
+		
+		console.log('payload: \n' + JSON.stringify(req, null, 2));
 	}
 }
 
@@ -303,6 +305,8 @@ function getPollAttachment(fieldArray){
 }
 
 function handleJoin(payload){
+	console.log('payload: \n' + JSON.stringify(payload, null, 2));
+	
 	var message = payload.original_message;
 	
 	var username = payload.user.name;
@@ -351,8 +355,6 @@ function handleJoin(payload){
 	message.replace_original = true;
 	
 	sendMessageToSlackResponseURL(payload.response_url, message);
-	
-	console.log('payload: \n' + JSON.stringify(payload, null, 2));
 }
 
 
