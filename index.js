@@ -86,19 +86,24 @@ function handleDestinyReq(req, res){
 				}
 				
 				
+				// MENU
 				else if(action_onatmenu == payload.actions[0].name){
-					sendImOnAt_Menu(payload.response_url);
+					sendImOnAt_Menu(payload.response_url, payload);
 				}
 				
+				// MENU
 				else if(action_getingon_start == payload.actions[0].name){
-					sendImOnAt_Start(payload.response_url);
+					sendImOnAt_Start(payload.response_url, payload);
 				}
+				// MENU
 				else if(action_getingon_hour == payload.actions[0].name){
-					sendImOnAt_AmPm(payload.response_url);
+					sendImOnAt_AmPm(payload.response_url), payload;
 				}
+				// MENU
 				else if(action_getingon_amp == payload.actions[0].name){
-					sendImOnAt_Day(payload.response_url);
+					sendImOnAt_Day(payload.response_url, payload);
 				}
+				// SEND MESSAGE
 				else if(action_getingon_day == payload.actions[0].name){
 					sendGettingOn(payload, payload.user);
 				}
@@ -289,7 +294,7 @@ function getRequestBodyText(req){
 	return ' Request: ' + JSON.stringify(req.body);
 }
 
-function sendImOnAt_Menu(responseURL){
+function sendImOnAt_Menu(responseURL, payload){
 	imon_cache[payload.user.id] = null;
 	var message = {
 		"replace_original": true,
@@ -409,7 +414,7 @@ function sendImOnAt_Start(responseURL, payload){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-function sendImOnAt_AmPm(responseURL){
+function sendImOnAt_AmPm(responseURL, payload){
 	imon_cache[payload.user.id] = payload.actions.selected_options.value;
 	var message = {
 		"replace_original": true,
@@ -451,7 +456,7 @@ function sendImOnAt_AmPm(responseURL){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-function sendImOnAt_Day(responseURL){
+function sendImOnAt_Day(responseURL, payload){
 	imon_cache[payload.user.id] += " " + payload.actions.selected_options.value;
 	var message = {
 		"replace_original": true,
