@@ -3,7 +3,7 @@ pg.defaults.ssl = true;
 
 
 module.exports.getUsers = function() {
-	users = [];
+	var usersa = [];
 	console.log('Get Users...');
 	
 	
@@ -24,7 +24,7 @@ module.exports.getUsers = function() {
 						.on('row', function(row) {
 							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
-							users[row.id] = row;
+							usersa[row.id] = row;
 						});
 		
 		
@@ -36,12 +36,12 @@ module.exports.getUsers = function() {
 			done();
 			// return results;
 			console.log('Done...');
-			console.log('Done Method: ' + JSON.stringify(users));
+			console.log('Done Method: ' + JSON.stringify(usersa));
 		});
 	});
 	
-	console.log('DB Method: ' + JSON.stringify(users));
-	return users;
+	console.log('DB Method: ' + JSON.stringify(usersa));
+	return usersa;
 };
 
 // id, name, img_url, destiny_name
