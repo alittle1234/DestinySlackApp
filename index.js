@@ -13,6 +13,20 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+var pg = require('pg');
+
+pg.defaults.ssl = true;
+pg.connect(process.env.DATABASE_URL, function(err, client) {
+  if (err) throw err;
+  console.log('Connected to postgres! Getting schemas...');
+
+  client
+    .query('SELECT table_schema,table_name FROM information_schema.tables;')
+    .on('row', function(row) {
+      console.log(JSON.stringify(row));
+    });
+});
+
 app.get('/', function(req, res) {
   res.render('pages/index2');
 });
@@ -247,7 +261,7 @@ function sendAskGetOn(payload, user){
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
 	var username = getPlayerName(user);
-	var title = "_*" + username + ":*" +"Is anyone getting on Destiny *" + time + "*?_";
+	var title = "*" + username + ":* " +"_Is anyone getting on Destiny " + time + "?_";
 	
 	var message = {
 		"text": title,
