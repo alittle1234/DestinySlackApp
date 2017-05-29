@@ -520,16 +520,13 @@ function sendImOnAt_Day(responseURL, payload){
 	sendMessageToSlackResponseURL(responseURL, message)
 }
 
-function emptyMessage(){
-	return {
-		"replace_original": true,
-		"text": "",
-		"attachments": []
-	}
-}
 
 function clearPrivate(responseURL){
-	sendMessageToSlackResponseURL(responseURL, emptyMessage());
+	var message = {
+		"replace_original": true,
+		"text": "_Message posted._"
+	}
+	sendMessageToSlackResponseURL(responseURL, message);
 }
 
 
