@@ -5,16 +5,16 @@ pg.connect(process.env.DATABASE_URL, function(err, client) {
   if (err) throw err;
   console.log('Connected to postgres! Getting schemas...');
 
-  client
-    .query('SELECT table_schema,table_name FROM information_schema.tables;')
-    .on('row', function(row) {
-      console.log(JSON.stringify(row));
-    });
+  // client
+    // .query('SELECT table_schema,table_name FROM information_schema.tables;')
+    // .on('row', function(row) {
+      // console.log(JSON.stringify(row));
+    // });
 });
 
-function getUsers(){
+exports.getUsers = () => {
 	users = [];
-	results = getDBAction( () =>{
+	results = getDBAction( () => {
 		client
 		.query('SELECT * FROM users;')
 		.on('row', function(row) {
@@ -23,10 +23,10 @@ function getUsers(){
 	});});
 	
 	return users;
-}
+};
 
 // id, name, img_url, destiny_name
-function storeUsers(users){
+exports.storeUsers = (users) => {
 	for(var i = 0; i < users.length; i++){
 		setDBAction( () =>{
 		client
@@ -40,7 +40,7 @@ function storeUsers(users){
 			});
 		});
 	}
-}
+};
 
 function insertUser(user){
 	setDBAction( () =>{
