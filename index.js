@@ -23,7 +23,7 @@ app.get('/', function(req, res) {
 var users = [];
 function setUsers(users){
 	console.log('Setting users...');
-	res.send(JSON.stringify(users, null, 2));
+	console.log(JSON.stringify(users, null, 2));
 }
 
 app.get('/users/', function(req, res) {
