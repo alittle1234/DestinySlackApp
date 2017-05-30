@@ -32,7 +32,7 @@ module.exports.getUsers = function() {
 		// After all data is returned, close connection and return results
 		
 		console.log('Finish...');
-		query.on('end', () => {
+		query.on('end', function() {
 			done();
 			// return results;
 			console.log('Done...');
