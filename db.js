@@ -2,8 +2,8 @@ var pg = require('pg');
 pg.defaults.ssl = true;
 
 
-module.exports.getUsers = function() {
-	var usersa = [];
+module.exports.getUsers = function(usersa, setUsers) {
+	//var usersa = [];
 	console.log('Get Users...');
 	
 	
@@ -37,6 +37,7 @@ module.exports.getUsers = function() {
 			// return results;
 			console.log('Done...');
 			console.log('Done Method: ' + JSON.stringify(usersa));
+			setUsers();
 		});
 	});
 	

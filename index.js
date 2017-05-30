@@ -20,9 +20,15 @@ app.get('/', function(req, res) {
   res.render('pages/index2');
 });
 
+var users = [];
+function setUsers(users){
+	console.log('Setting users...');
+	res.send(JSON.stringify(users, null, 2));
+}
+
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	res.send(JSON.stringify(db.getUsers(), null, 2));
+	res.send(JSON.stringify(db.getUsers(users, setUsers.bind(this, users)), null, 2));
 	console.log('Done fetching users...');
 });
 
