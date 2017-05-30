@@ -21,17 +21,17 @@ app.get('/', function(req, res) {
 });
 
 var users = [];
-function setUsers(users){
+function setUsers(users, req, res){
 	console.log('Setting users...');
 	console.log(JSON.stringify(users, null, 2));
+	
+	
+	res.send(JSON.stringify(users, null, 2));
 }
 
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	db.getUsers(users, setUsers.bind(this, users), () =>{
-		console.log('Internal get users...');
-		res.send(JSON.stringify(users, null, 2));
-	});
+	db.getUsers(users, setUsers.bind(this, users, req, res));
 	console.log('Done fetching users...');
 });
 
