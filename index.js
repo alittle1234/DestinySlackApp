@@ -28,7 +28,10 @@ function setUsers(users){
 
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	res.send(JSON.stringify(db.getUsers(users, setUsers.bind(this, users)), null, 2));
+	db.getUsers(users, setUsers.bind(this, users), () =>{
+		console.log('Internal get users...');
+		res.send(JSON.stringify(users, null, 2));
+	});
 	console.log('Done fetching users...');
 });
 
