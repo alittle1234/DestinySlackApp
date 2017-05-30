@@ -40,9 +40,6 @@ app.listen(app.get('port'), function() {
 });
 
 
-// https://polar-island-85982.herokuapp.com/
-
-
 // end point for /d command
 app.post('/d', urlencodedParser, function(req, res) {
     if (!req.body) {
@@ -157,7 +154,20 @@ function handleDestinyReq(req, res){
 			}else{
 				
 				// TODO check action... was basic menu?
-				sendBasicMenu(reqBody.response_url);
+				if(reqBody.text || reqBody.text.trim() == ""){
+					sendBasicMenu(reqBody.response_url);
+				}else{
+					var message = {
+						"text": payload.user.name+" payload: \n"
+						 + JSON.stringify(payload, null, 2),
+						"replace_original": false
+					}
+					sendMessageToSlackResponseURL(payload.response_url, message);
+					
+					// set user name
+					// set user image
+				}
+				
 				
 				// parse text
 				// perform action
