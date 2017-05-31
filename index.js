@@ -201,7 +201,7 @@ var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab922
 //"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
 // lookup thumbnail for most recent player background
-function getThumbUrl(username){
+function getThumbUrl(user){
 	if(users && users[user.id]
 		&& users[user.id].img_url){
 		return users[user.id].img_url;
