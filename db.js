@@ -59,7 +59,7 @@ module.exports.storeUsers = function(users) {
 				var user = users[i];
 				console.log('Storing...');
 				query = client
-					.query('SELECT id FROM FROM users where id='+user.id+';')
+					.query('SELECT id FROM users where id='+user.id+';')
 					.on('row', function(row) {
 					   if(row && row.id == user.id){
 							console.log('Updating...');
