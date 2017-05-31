@@ -90,18 +90,18 @@ module.exports.storeUsers = function(users) {
 						   );
 						}else{
 							client.query('UPDATE users SET name=($1), '
-								+ (user.img_url ? 'img_url=($2),' : 'destiny_name=($2),') 
+								+ (user.img_url ? 'img_url=($2)' : 'destiny_name=($2)') 
 								+' WHERE id=($3::varchar);',
-							[user.name, 
-							(user.img_url ?  user.img_url : user.destiny_name), 
-							user.id],
-								function (err, result) {
-									console.log('Update Complete...');
-									if (err) {
-									  return console.error('error during query: ' + user.id, err)
+								[user.name, 
+								(user.img_url ?  user.img_url : user.destiny_name), 
+								user.id],
+									function (err, result) {
+										console.log('Update Complete...');
+										if (err) {
+										  return console.error('error during query: ' + user.id, err)
+										}
 									}
-								}
-						   );
+							   );
 						}
 					}else{
 						console.log('Inserting...');
