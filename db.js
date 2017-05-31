@@ -89,8 +89,8 @@ module.exports.storeUsers = function(users) {
 						   );
 						}else{
 							client.query('UPDATE users SET name=($1), '
-								+ user.img_url ? 'img_url=($2),':'destiny_name=($2),' 
-								+' WHERE id=($4::varchar);',
+								+ user.img_url ? 'img_url=($2),' : 'destiny_name=($2),' 
+								+' WHERE id=($3::varchar);',
 							[user.name, 
 							user.img_url ?  user.img_url : user.destiny_name, 
 							user.id],
