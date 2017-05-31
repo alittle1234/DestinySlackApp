@@ -43,19 +43,24 @@ module.exports.getUsers = function(users, setUsers) {
 };
 
 // id, name, img_url, destiny_name
-exports.storeUsers = (users) => {
+module.exports.storeUsers = function(users) {
 	for(var i = 0; i < users.length; i++){
-		setDBAction( () =>{
-		client
-			.query('SELECT id FROM FROM users where id='+users[i].id+';')
-			.on('row', function(row) {
-			   if(row && row.id == users[i].id){
-					updateUser(users[i]);
-			   }else{
-					insertUser(users[i]);
-			   }
+		if(users[i] && users[i].id){
+			
+			console.log('Storing...');
+			setDBAction( () =>{
+			client
+				.query('SELECT id FROM FROM users where id='+users[i].id+';')
+				.on('row', function(row) {
+				   if(row && row.id == users[i].id){
+						updateUser(users[i]);
+				   }else{
+						insertUser(users[i]);
+				   }
+				});
 			});
-		});
+		
+		}
 	}
 };
 
@@ -100,6 +105,7 @@ function getDBAction(queryMethod){
 }
 
 function setDBAction(queryMethod){
+			console.log('setDBAction...');
 	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
 		// Handle connection errors
 		if(err) {
@@ -114,6 +120,7 @@ function setDBAction(queryMethod){
 		// After all data is returned, close connection and return results
 		query.on('end', () => {
 			done();
+			console.log('setDBAction Done...');
 			return;
 		});
 	});

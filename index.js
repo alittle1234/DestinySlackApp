@@ -22,16 +22,18 @@ app.get('/', function(req, res) {
 
 var users = [];
 function printUsers(users, req, res){
-	console.log('Setting users...');
+	console.log('printUsers...');
 	console.log(JSON.stringify(users, null, 2));
 	res.send(JSON.stringify(users, null, 2));
 }
 
 function getUsers(callback){
+	console.log('getUsers...');
 	db.getUsers(users, callback);
 }
 
 function storeUsers(){
+	console.log('storeUsers...');
 	db.storeUsers(users);
 }
 
@@ -91,12 +93,12 @@ function handleDestinyReq(req, res){
 	try{
 		if(req.body){
 			var reqBody = req.body;
-			var message2 = {
-						"text": " payload: \n"
-						 + JSON.stringify(reqBody, null, 2),
-						"replace_original": false
-					}
-					sendMessageToSlackResponseURL(req.body.response_url, message2);
+			// var message2 = {
+						// "text": " payload: \n"
+						 // + JSON.stringify(reqBody, null, 2),
+						// "replace_original": false
+					// }
+					// sendMessageToSlackResponseURL(req.body.response_url, message2);
 					
 			// TODO add bot, text scaning
 			// TODO complete anyone getting on?
@@ -218,6 +220,7 @@ function getPlayerName(user){
 }
 
 function setAndStoreUser(userId, name, image){
+	console.log('setAndStoreUser...');
 	users[userId].id = userId;
 	if(name){
 		users[userId].destiny_name = name;
@@ -230,6 +233,7 @@ function setAndStoreUser(userId, name, image){
 }
 
 function setUserName(userId, name){
+	console.log('setUserName...');
 	if(!users || !users[userId]){
 		getUsers(setAndStoreUser.bind(this, userId, name, null));
 	}else{
@@ -238,6 +242,7 @@ function setUserName(userId, name){
 }
 
 function setUserImage(userId, image){
+	console.log('setUserImage...');
 	if(!users || !users[userId]){
 		getUsers(setAndStoreUser.bind(this, userId, null, image));
 	}else{
