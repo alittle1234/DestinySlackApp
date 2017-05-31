@@ -81,24 +81,26 @@ module.exports.storeUsers = function(users) {
 						if(user.img_url && user.destiny_name){
 							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
  -								[user.name, user.img_url, user.destiny_name, user.id],
-									function (err, result, user) {
+									function (err, result) {
 										console.log('Update Full Complete...');
 										if (err) {
-										  return console.error('error during query: ' + user.id, err)
+										  return console.error('error during Full query: ', err)
 										}
 								}
 						   );
 						}else{
-							client.query('UPDATE users SET name=($1), '
+							var statment = 'UPDATE users SET name=($1), '
 								+ (user.img_url ? 'img_url=($2)' : 'destiny_name=($2)') 
-								+' WHERE id=($3::varchar);',
-								[user.name, 
-								(user.img_url ?  user.img_url : user.destiny_name), 
-								user.id],
-									function (err, result, user) {
+								+' WHERE id=($3::varchar);';
+							var params = [];
+							params[0] = user.name;
+							params[1] = (user.img_url ?  user.img_url : user.destiny_name);
+							params[2] = user.id;
+							client.query(statment, params,
+									function (err, result) {
 										console.log('Update Parts Complete...');
 										if (err) {
-										  return console.error('error during query: ' + user.id, err)
+										  return console.error('error during Part query: ', err)
 										}
 									}
 							   );
