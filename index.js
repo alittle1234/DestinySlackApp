@@ -202,6 +202,7 @@ var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab922
 
 // lookup thumbnail for most recent player background
 function getThumbUrl(user){
+	console.log('getThumbUrl...' + users[user.id].img_url  );
 	if(users && users[user.id]
 		&& users[user.id].img_url){
 		return users[user.id].img_url;
