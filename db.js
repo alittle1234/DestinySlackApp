@@ -24,7 +24,8 @@ module.exports.getUsers = function(users, setUsers) {
 						.on('row', function(row) {
 							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
-							users[row.id] = {
+							var uId = row.id;
+							users[uId] = {
 								"id":row.id,
 								"name":row.name,
 								"img_url":row.img_url,
@@ -61,9 +62,8 @@ module.exports.storeUsers = function(users) {
 		
 		var query;
 		
-		for(var i = 0; i < users.length; i++){
-			if(users[i] && users[i].id){
-				var user = users[i];
+		for(user in users){
+			if(user && user.id){
 				console.log('Storing...');
 				query = client
 					.query('SELECT id FROM users WHERE id=\''+user.id+'\';')
@@ -72,7 +72,7 @@ module.exports.storeUsers = function(users) {
 					   
 					   if(row && row.id == user.id){
 							console.log('Updating...');
-							client.query('UPDATE users SET name=(\'$1\'), img_url=(\'$2\'), destiny_name=(\'$3\') WHERE id=\'($4)\'',
+							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar)',
 								[user.name, user.img_url, user.destiny_name, user.id]);
 					   }else{
 							console.log('Inserting...');
