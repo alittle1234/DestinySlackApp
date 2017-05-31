@@ -30,7 +30,7 @@ function setUsers(users, req, res){
 }
 	
 const getUsers = () => {
-	db.getUsers(users, setUsers.bind(this, users, req, res))
+	db.getUsers(users) // , setUsers.bind(this, users, req, res)
 	.then( ()=> {
 		console.log(JSON.stringify(users, null, 2));
 		return "done"
@@ -44,6 +44,7 @@ function storeUsers(){
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
 	getUsers();
+	setUsers(users, req, res);
 	console.log('Done fetching users...');
 });
 
