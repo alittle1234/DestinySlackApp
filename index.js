@@ -164,6 +164,7 @@ function handleDestinyReq(req, res){
 					sendMessageToSlackResponseURL(payload.response_url, message);
 				}
 			}else{
+				// SLASH COMMANDS
 				
 				if(!reqBody.text || reqBody.text.trim() == ""){
 					// show basic menu
@@ -177,6 +178,12 @@ function handleDestinyReq(req, res){
 					} else if(action_setImage == params[0]){
 						// set user image
 						setUserImage(reqBody.user_id, params[1])
+					}
+					
+					// IM ON
+					else if(action_imon == params[0]){
+						// send "I'm On" message
+						sendImOn(null, users[reqBody.user_id]);
 					}
 				}
 			}
@@ -273,7 +280,7 @@ function setUserImage(userId, image){
 */
 function sendImOn(payload, user){
 	// clear private message
-	clearPrivate(payload.response_url);
+	if(payload) clearPrivate(payload.response_url);
 	
 	var username = getPlayerName(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
