@@ -75,12 +75,28 @@ module.exports.storeUsers = function(users) {
 					   if(row && row.id == user.id){
 							console.log('Updating...');
 							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar)',
-								[user.name, user.img_url, user.destiny_name, user.id]);
+								[user.name, user.img_url, user.destiny_name, user.id],
+									function (err, result) {
+										done()
+
+										if (err) {
+										  return console.error('error during query', err)
+										}
+									}
+							   );
 					   }else{
 							console.log('Inserting...');
 							client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
 								'VALUES($1, $2, $3, $4)',
-								[user.id, user.name, user.img_url, user.destiny_name]);
+								[user.id, user.name, user.img_url, user.destiny_name],
+									function (err, result) {
+										done()
+
+										if (err) {
+										  return console.error('error during query', err)
+										}
+									}
+							   );
 					   }
 					});
 			
