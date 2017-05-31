@@ -44,84 +44,46 @@ module.exports.getUsers = function(users, setUsers) {
 
 // id, name, img_url, destiny_name
 module.exports.storeUsers = function(users) {
-	for(var i = 0; i < users.length; i++){
-		if(users[i] && users[i].id){
-			
-			console.log('Storing...');
-			setDBAction( () =>{
-			client
-				.query('SELECT id FROM FROM users where id='+users[i].id+';')
-				.on('row', function(row) {
-				   if(row && row.id == users[i].id){
-						updateUser(users[i]);
-				   }else{
-						insertUser(users[i]);
-				   }
-				});
-			});
-		
+	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
+		// Handle connection errors
+		if(err) {
+			done();
+			console.log(err);
+			return res.status(500).json({success: false, data: err});
 		}
-	}
+		
+		var query;
+		
+		for(var i = 0; i < users.length; i++){
+			if(users[i] && users[i].id){
+				var user = users[i];
+				console.log('Storing...');
+				query = client
+					.query('SELECT id FROM FROM users where id='+user.id+';')
+					.on('row', function(row) {
+					   if(row && row.id == user.id){
+							console.log('Updating...');
+							client.query('UPDATE items SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4)',
+								[user.name, user.img_url, user.destiny_name, user.id]);
+					   }else{
+							console.log('Inserting...');
+							client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
+								'values($1, $2, $3, $4)',
+								[user.id, user.name, user.img_url, user.destiny_name]);
+					   }
+					});
+			
+			}
+		}
+		
+		if(query){
+			query.on('end', () => {
+				done();
+				console.log('exports.storeUsers Done...');
+				return;
+			});
+		}
+		
+	});
 };
 
-function insertUser(user){
-	setDBAction( () =>{
-	client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
-		'values($1, $2, $3, $4)',
-		[user.id, user.name, user.img_url, user.destiny_name]);
-	});
-}
-
-function updateUser(user){
-	setDBAction( () =>{
-	client.query('UPDATE items SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4)',
-		[user.name, user.img_url, user.destiny_name, user.id]);
-	});
-}
-
-function getDBAction(queryMethod){
-	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
-		const results = [];
-		// Handle connection errors
-		if(err) {
-			done();
-			console.log(err);
-			return res.status(500).json({success: false, data: err});
-		}
-		
-		// SQL Query > Select Data
-		const query = queryMethod();
-		// Stream results back one row at a time
-		query.on('row', (row) => {
-			results.push(row);
-		});
-		
-		// After all data is returned, close connection and return results
-		query.on('end', () => {
-			done();
-			return results;
-		});
-	});
-}
-
-function setDBAction(queryMethod){
-			console.log('setDBAction...');
-	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
-		// Handle connection errors
-		if(err) {
-			done();
-			console.log(err);
-			return res.status(500).json({success: false, data: err});
-		}
-		
-		// SQL Query > Select Data
-		const query = queryMethod();
-		
-		// After all data is returned, close connection and return results
-		query.on('end', () => {
-			done();
-			console.log('setDBAction Done...');
-			return;
-		});
-	});
-}
