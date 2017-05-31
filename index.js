@@ -21,20 +21,14 @@ app.get('/', function(req, res) {
 });
 
 var users = [];
-function setUsers(users, req, res){
+function printUsers(users, req, res){
 	console.log('Setting users...');
 	console.log(JSON.stringify(users, null, 2));
-	
-	
 	res.send(JSON.stringify(users, null, 2));
 }
-	
-const getUsers = () => {
-	db.getUsers(users) // , setUsers.bind(this, users, req, res)
-	.then( ()=> {
-		console.log(JSON.stringify(users, null, 2));
-		return "done"
-	})
+
+function getUsers(callback){
+	db.getUsers(users, callback);
 }
 
 function storeUsers(){
@@ -43,8 +37,7 @@ function storeUsers(){
 
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	getUsers();
-	setUsers(users, req, res);
+	getUsers(printUsers.bind(this, users, req, res));
 	console.log('Done fetching users...');
 });
 
@@ -224,28 +217,32 @@ function getPlayerName(user){
 	return user.name;
 }
 
-function setUserName(userId, name){
-	if(!users || !users[userId]){
-		getUsers();
-		// TODO wait for call back
-	}
-	
+function setAndStoreUser(userId, name, image){
 	users[userId].id = userId;
-	users[userId].destiny_name = name;
+	if(name){
+		users[userId].destiny_name = name;
+	}
+	if(image){
+		users[userId].img_url = image;
+	}
 	
 	storeUsers();
 }
 
+function setUserName(userId, name){
+	if(!users || !users[userId]){
+		getUsers(setAndStoreUser.bind(this, userId, name, null));
+	}else{
+		setAndStoreUser(userId, name, null);
+	}
+}
+
 function setUserImage(userId, image){
 	if(!users || !users[userId]){
-		getUsers();
-		// TODO wait for call back
+		getUsers(setAndStoreUser.bind(this, userId, null, image));
+	}else{
+		setAndStoreUser(userId, null, image);
 	}
-	
-	users[userId].id = userId;
-	users[userId].img_url = image;
-	
-	storeUsers();
 }
 
 /* sends a "Player is on!" message
