@@ -88,7 +88,7 @@ function handleDestinyReq(req, res){
 						 + JSON.stringify(reqBody, null, 2),
 						"replace_original": false
 					}
-					sendMessageToSlackResponseURL(payload.response_url, message2);
+					sendMessageToSlackResponseURL(req.body.response_url, message2);
 					
 			// TODO parse text from bot slash
 			// var textData = parseText(req.body.text);
