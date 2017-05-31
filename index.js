@@ -28,10 +28,22 @@ function setUsers(users, req, res){
 	
 	res.send(JSON.stringify(users, null, 2));
 }
+	
+const getUsers = () => {
+	db.getUsers(users, setUsers.bind(this, users, req, res))
+	.then( ()=> {
+		console.log(JSON.stringify(users, null, 2));
+		return "done"
+	})
+}
+
+function storeUsers(){
+	db.storeUsers(users);
+}
 
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	db.getUsers(users, setUsers.bind(this, users, req, res));
+	getUsers();
 	console.log('Done fetching users...');
 });
 
@@ -74,6 +86,8 @@ var action_getingon_day = "onat_day";
 
 var action_askgeton = "askgeton";
 
+var action_setName = "name";
+var action_setImage = "image";
 
 // handle all the destiny app requests
 function handleDestinyReq(req, res){
@@ -90,12 +104,6 @@ function handleDestinyReq(req, res){
 					}
 					sendMessageToSlackResponseURL(req.body.response_url, message2);
 					
-			// TODO parse text from bot slash
-			// var textData = parseText(req.body.text);
-			
-			// TODO add user name / id link
-			// TODO add user id -> img url db
-			// TODO add user update paths (name,img url) if not exist, add
 			// TODO add bot, text scaning
 			// TODO complete anyone getting on?
 			// TODO move methods to classes?
@@ -159,8 +167,7 @@ function handleDestinyReq(req, res){
 				}
 			}else{
 				
-				// TODO check action... was basic menu?
-				if(reqBody.text || reqBody.text.trim() == ""){
+				if(!reqBody.text || reqBody.text.trim() == ""){
 					sendBasicMenu(reqBody.response_url);
 				}else{
 					var message = {
@@ -170,13 +177,15 @@ function handleDestinyReq(req, res){
 					}
 					sendMessageToSlackResponseURL(payload.response_url, message);
 					
-					// set user name
-					// set user image
+					var params = reqBody.text.split(' ');
+					if(action_setName = params[0]){
+						// set user name
+						setUserName(reqBody.user_id, params[1])
+					} else if(action_setImage = params[0]){
+						// set user image
+						setUserImage(reqBody.user_id, params[1])
+					}
 				}
-				
-				
-				// parse text
-				// perform action
 			}
 		}else{
 			concat += ' NO BODY ';
@@ -188,7 +197,7 @@ function handleDestinyReq(req, res){
 	}
 }
 
-var icon_url = "http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
+var icon_url = ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
 var app_name = "Destiny App";
 var general_webhook = "https://hooks.slack.com/services/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";
 
@@ -197,7 +206,8 @@ var invite_color = "#31110A";
 var join_ask = "Join them?";
 
 var join_im_on_callback = "join_im_on";
-var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
+var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab9229b8164aff89c7801f332b54c.jpg";
+//"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
 // lookup thumbnail for most recent player background
 function getThumbUrl(username){
@@ -206,7 +216,35 @@ function getThumbUrl(username){
 
 // get associated destiny name
 function getPlayerName(user){
+	if(users && users[user.id]
+		&& users[user.id].destiny_name){
+		return users[user.id].destiny_name;
+	}
 	return user.name;
+}
+
+function setUserName(userId, name){
+	if(!users || !users[userId]){
+		getUsers();
+		// TODO wait for call back
+	}
+	
+	users[userId].id = userId;
+	users[userId].destiny_name = name;
+	
+	storeUsers();
+}
+
+function setUserImage(userId, image){
+	if(!users || !users[userId]){
+		getUsers();
+		// TODO wait for call back
+	}
+	
+	users[userId].id = userId;
+	users[userId].img_url = image;
+	
+	storeUsers();
 }
 
 /* sends a "Player is on!" message
