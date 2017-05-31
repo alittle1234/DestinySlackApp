@@ -62,9 +62,10 @@ module.exports.storeUsers = function(users) {
 		
 		var query;
 		
-		for(user in users){
-			if(user)	console.log('User: ' + JSON.stringify(user));
-			if(user && user.id){
+		for(key in users){
+			if(key)	console.log('User: ' + JSON.stringify(key));
+			if(key && users[key].id){
+				var user = users[key];
 				console.log('Storing...');
 				query = client
 					.query('SELECT id FROM users WHERE id=\''+user.id+'\';')
