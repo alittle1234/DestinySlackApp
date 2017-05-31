@@ -202,6 +202,10 @@ var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab922
 
 // lookup thumbnail for most recent player background
 function getThumbUrl(username){
+	if(users && users[user.id]
+		&& users[user.id].img_url){
+		return users[user.id].img_url;
+	}
 	return def_thum_url;
 }
 
@@ -277,7 +281,7 @@ function sendImOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			getJoinAttachment(username)
+			getJoinAttachment(username, true, user)
 		]
 	}
 	sendMessageToSlackResponseURL(general_webhook, message);
@@ -311,7 +315,7 @@ function sendGettingOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			getJoinAttachment(username)
+			getJoinAttachment(username, true, user)
 		]
 	};
 	
@@ -338,7 +342,7 @@ function sendAskGetOn(payload, user){
 		"icon_url": icon_url,
 		"replace_original": true,
 		"attachments": [
-			getJoinAttachment(username, false)
+			getJoinAttachment(username, false, user)
 		]
 	}
 	sendMessageToSlackResponseURL(general_webhook, message);
@@ -347,14 +351,14 @@ function sendAskGetOn(payload, user){
 /* 	the join question attachment for orginal message posts
 * 	buttons triger the 'join' action whcih updates the poll results
 */
-function getJoinAttachment(username, ask=true){
+function getJoinAttachment(username, ask=true, user){
 	return {
 				"text": ask ? join_ask : "",
 				"fallback": "Join " + username + " on Destiny?",
 				"callback_id": join_im_on_callback,
 				"color": invite_color,
 				"attachment_type": "default", // TODO what is this?
-				"thumb_url": getThumbUrl(username),
+				"thumb_url": getThumbUrl(user),
 
 				"actions": [
 					{
