@@ -164,15 +164,10 @@ function handleDestinyReq(req, res){
 			}else{
 				
 				if(!reqBody.text || reqBody.text.trim() == ""){
+					// show basic menu
 					sendBasicMenu(reqBody.response_url);
 				}else{
-					var message = {
-						"text": payload.user.name+" payload: \n"
-						 + JSON.stringify(payload, null, 2),
-						"replace_original": false
-					}
-					sendMessageToSlackResponseURL(payload.response_url, message);
-					
+					// parse into command and parameters
 					var params = reqBody.text.split(' ');
 					if(action_setName = params[0]){
 						// set user name
