@@ -77,7 +77,7 @@ module.exports.storeUsers = function(users) {
 							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar)',
 								[user.name, user.img_url, user.destiny_name, user.id],
 									function (err, result) {
-										done()
+										console.log('Update Complete...');
 
 										if (err) {
 										  return console.error('error during query', err)
@@ -90,7 +90,7 @@ module.exports.storeUsers = function(users) {
 								'VALUES($1, $2, $3, $4)',
 								[user.id, user.name, user.img_url, user.destiny_name],
 									function (err, result) {
-										done()
+										console.log('Insert Complete...');
 
 										if (err) {
 										  return console.error('error during query', err)
