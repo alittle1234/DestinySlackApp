@@ -59,57 +59,55 @@ module.exports.storeUsers = function(users) {
 			console.log(err);
 			return res.status(500).json({success: false, data: err});
 		}
-		
-		var query;
-		
-		for(key in users){
-			if(key)	console.log('User: ' + JSON.stringify(key));
-			if(key && users[key].id){
-				var user = users[key];
-				console.log('Storing...');
-				query = client
-					.query('SELECT id FROM users WHERE id=\''+user.id+'\';')
+		// select all ids
+		var ids = [];
+		var query = client
+					.query('SELECT id FROM users;')
 					.on('row', function(row) {
-					   if(row)	console.log('Row: ' + JSON.stringify(row, null, 2));
-					   
-					   if(row && row.id == user.id){
-							console.log('Updating...');
-							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
-								[user.name, user.img_url, user.destiny_name, user.id],
-									function (err, result) {
-										console.log('Update Complete...');
-
-										if (err) {
-										  return console.error('error during query', err)
-										}
-									}
-							   );
-					   }else{
-							console.log('Inserting...');
-							client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
-								'VALUES($1, $2, $3, $4);',
-								[user.id, user.name, user.img_url, user.destiny_name],
-									function (err, result) {
-										console.log('Insert Complete...');
-
-										if (err) {
-										  return console.error('error during query', err)
-										}
-									}
-							   );
-					   }
+						ids[row.id] = 1;
 					});
-			
-			}
-		}
+		// add each user, checkin id to store or insert
+		query.on('end', () => {
+			console.log('Select All Done...');
 		
-	//	if(query){
-	//		query.on('end', () => {
-	//			done();
-	//			console.log('exports.storeUsers Done...');
-	//			return;
-	//		});
-	//	}
+			for(key in users){
+				if(key)	console.log('User: ' + JSON.stringify(key));
+				if(key && users[key].id){
+					var user = users[key];
+					console.log('Storing... '  + user.id + ' ' + ids[user.id]);
+						   
+					if(ids[user.id]){
+						console.log('Updating...');
+						client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
+							[user.name, user.img_url, user.destiny_name, user.id],
+								function (err, result) {
+									console.log('Update Complete...');
+									if (err) {
+									  return console.error('error during query: ' + user.id, err)
+									}
+								}
+						   );
+					}else{
+						console.log('Inserting...');
+						client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
+							'VALUES($1, $2, $3, $4);',
+							[user.id, user.name, user.img_url, user.destiny_name],
+								function (err, result) {
+									console.log('Insert Complete...');
+									if (err) {
+									  return console.error('error during query: ' + user.id, err)
+									}
+								}
+						   );
+					}
+				
+				}
+			}
+			
+			return;
+		});
+		
+	
 		
 	});
 };
