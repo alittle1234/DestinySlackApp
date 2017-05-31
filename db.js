@@ -63,6 +63,7 @@ module.exports.storeUsers = function(users) {
 		var query;
 		
 		for(user in users){
+			if(user)	console.log('User: ' + JSON.stringify(user));
 			if(user && user.id){
 				console.log('Storing...');
 				query = client

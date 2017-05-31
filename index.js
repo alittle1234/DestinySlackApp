@@ -20,7 +20,7 @@ app.get('/', function(req, res) {
   res.render('pages/index2');
 });
 
-var users = [];
+var users = {};
 function printUsers(users, req, res){
 	console.log('printUsers...');
 	console.log(JSON.stringify(users, null, 2));
@@ -233,6 +233,9 @@ function setAndStoreUser(userId, name, image){
 	if(image){
 		users[userId].img_url = image;
 	}
+	
+	console.log('Users Pre-Store...');
+	console.log(JSON.stringify(users, null, 2));
 	
 	storeUsers();
 }
