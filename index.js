@@ -215,10 +215,15 @@ function getPlayerName(user){
 }
 
 function setAndStoreUser(userId, name, image){
-	console.log('setAndStoreUser...');
+	console.log('setAndStoreUser...' + userId + ' ' + name + ' ' + image  );
 	
 	if(!users[userId]){
-		users[userId] = {};
+		console.log('new user...');
+		users[userId] = {
+					"id":userId,
+					"img_url":image,
+					"destiny_name":name
+				};
 	}
 	
 	users[userId].id = userId;

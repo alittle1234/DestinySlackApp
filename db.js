@@ -24,7 +24,12 @@ module.exports.getUsers = function(users, setUsers) {
 						.on('row', function(row) {
 							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
-							users[row.id] = row;
+							users[row.id] = {
+								"id":row.id,
+								"name":row.name,
+								"img_url":row.img_url,
+								"destiny_name":row.destiny_name
+							};
 						});
 		
 		
