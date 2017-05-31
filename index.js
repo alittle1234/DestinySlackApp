@@ -169,10 +169,10 @@ function handleDestinyReq(req, res){
 				}else{
 					// parse into command and parameters
 					var params = reqBody.text.split(' ');
-					if(action_setName = params[0]){
+					if(action_setName == params[0]){
 						// set user name
 						setUserName(reqBody.user_id, params[1])
-					} else if(action_setImage = params[0]){
+					} else if(action_setImage == params[0]){
 						// set user image
 						setUserImage(reqBody.user_id, params[1])
 					}

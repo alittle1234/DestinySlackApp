@@ -78,8 +78,22 @@ module.exports.storeUsers = function(users) {
 						   
 					if(ids[user.id]){
 						console.log('Updating...');
-						client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
-							[user.name, user.img_url, user.destiny_name, user.id],
+						if(user.img_url && user.destiny_name){
+							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
+ -								[user.name, user.img_url, user.destiny_name, user.id],function (err, result) {
+									console.log('Update Complete...');
+									if (err) {
+									  return console.error('error during query: ' + user.id, err)
+									}
+								}
+						   );
+						}else{
+							client.query('UPDATE users SET name=($1), '
+								+ user.img_url ? 'img_url=($2),':'destiny_name=($2),' 
+								+' WHERE id=($4::varchar);',
+							[user.name, 
+							user.img_url ?  user.img_url : user.destiny_name, 
+							user.id],
 								function (err, result) {
 									console.log('Update Complete...');
 									if (err) {
@@ -87,6 +101,7 @@ module.exports.storeUsers = function(users) {
 									}
 								}
 						   );
+						}
 					}else{
 						console.log('Inserting...');
 						client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
