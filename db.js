@@ -44,6 +44,8 @@ module.exports.getUsers = function(users, setUsers) {
 
 // id, name, img_url, destiny_name
 module.exports.storeUsers = function(users) {
+	console.log('Storing Users...');
+	console.log(JSON.stringify(users, null, 2));
 	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
 		// Handle connection errors
 		if(err) {
@@ -61,7 +63,8 @@ module.exports.storeUsers = function(users) {
 				query = client
 					.query('SELECT id FROM users WHERE id=\''+user.id+'\';')
 					.on('row', function(row) {
-						console.log('Row: ' + row);
+					   if(row)	console.log('Row: ' + JSON.stringify(row, null, 2));
+					   
 					   if(row && row.id == user.id){
 							console.log('Updating...');
 							client.query('UPDATE users SET name=(\'$1\'), img_url=(\'$2\'), destiny_name=(\'$3\') WHERE id=\'($4)\'',
@@ -77,13 +80,13 @@ module.exports.storeUsers = function(users) {
 			}
 		}
 		
-		if(query){
-			query.on('end', () => {
-				done();
-				console.log('exports.storeUsers Done...');
-				return;
-			});
-		}
+	//	if(query){
+	//		query.on('end', () => {
+	//			done();
+	//			console.log('exports.storeUsers Done...');
+	//			return;
+	//		});
+	//	}
 		
 	});
 };
