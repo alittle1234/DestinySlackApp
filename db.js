@@ -59,16 +59,16 @@ module.exports.storeUsers = function(users) {
 				var user = users[i];
 				console.log('Storing...');
 				query = client
-					.query('SELECT id FROM users where id='+user.id+';')
+					.query('SELECT id FROM users WHERE id='+user.id+';')
 					.on('row', function(row) {
 					   if(row && row.id == user.id){
 							console.log('Updating...');
-							client.query('UPDATE items SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4)',
+							client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4)',
 								[user.name, user.img_url, user.destiny_name, user.id]);
 					   }else{
 							console.log('Inserting...');
 							client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
-								'values($1, $2, $3, $4)',
+								'VALUES($1, $2, $3, $4)',
 								[user.id, user.name, user.img_url, user.destiny_name]);
 					   }
 					});
