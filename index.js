@@ -21,6 +21,8 @@ app.get('/', function(req, res) {
 });
 
 var users = {};
+db.getUsers(users, null);
+
 function printUsers(users, req, res){
 	console.log('printUsers...');
 	console.log(JSON.stringify(users, null, 2));
