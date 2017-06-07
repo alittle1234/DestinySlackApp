@@ -90,21 +90,22 @@ var join_ask 		= "Join them?";
 var join_im_on_callback = "join_im_on";
 var imon_cache = [];
 
-var action_imon 			= "imon";
-var action_join 			= "join";
-
-var action_getingon 		= "getingonat";
-
-var action_onatmenu 		= "onatmenu";
-var action_getingon_start 	= "onat_start";
-var action_getingon_hour 	= "onat_hour";
-var action_getingon_amp 	= "onat_ampm";
-var action_getingon_day 	= "onat_day";
-
-var action_askgeton 		= "askgeton";
-
-var action_setName 			= "name";
-var action_setImage 		= "image";
+var action = {
+	imon : 				"imon",
+	join : 				"join",
+	
+	gettingon : 		"getingonat",
+	gettingon_menu : 	"onatmenu",
+	gettingon_start : 	"onat_start",
+	gettingon_hour : 	"onat_hour",
+	gettingon_amp : 	"onat_ampm",
+	gettingon_day : 	"onat_day",
+	
+	askgeton : 			"askgeton",
+	
+	setname : 			"name",
+	setimage : 			"image",
+};
 
 
 /* 
@@ -135,47 +136,47 @@ function handleDestinyReq(req, res){
 				var actionName = payload.actions[0].name;
 				
 				// SEND MESSAGE -- IM ON
-				if(action_imon == actionName){
+				if(action.imon == actionName){
 					sendImOn(payload, payload.user);
 				}
 				
 				
 				// MENU -- ON AT...
-				else if(action_onatmenu == actionName){
+				else if(action.gettingon_menu == actionName){
 					sendImOnAt_Menu(payload.response_url, payload);
 				}
 				
 				// MENU
-				else if(action_getingon_start == actionName){
+				else if(action.gettingon_start == actionName){
 					sendImOnAt_Start(payload.response_url, payload);
 				}
 				// MENU
-				else if(action_getingon_hour == actionName){
+				else if(action.gettingon_hour == actionName){
 					sendImOnAt_AmPm(payload.response_url, payload);
 				}
 				// MENU
-				else if(action_getingon_amp == actionName){
+				else if(action.gettingon_amp == actionName){
 					sendImOnAt_Day(payload.response_url, payload);
 				}
 				// SEND MESSAGE -- ON AT...
-				else if(action_getingon_day == actionName){
+				else if(action.gettingon_day == actionName){
 					sendGettingOn(payload, payload.user);
 				}
 				
 				// SEND MESSAGE -- ON AT...
-				else if(action_getingon == actionName){
+				else if(action.askgeton == actionName){
 					sendGettingOn(payload, payload.user);
 				}
 				
 				
 				// TODO not fully implemented
-				else if(action_askgeton == actionName){
+				else if(action.askgeton == actionName){
 					sendAskGetOn(payload, payload.user);
 				}
 				
 				
 				// JOIN ACTION
-				else if(action_join == actionName){
+				else if(action.join == actionName){
 					handleJoin(payload);
 				}
 				
@@ -196,16 +197,16 @@ function handleDestinyReq(req, res){
 				}else{
 					// parse into command and parameters
 					var params = reqBody.text.split(' ');
-					if(action_setName == params[0]){
+					if(action.setname == params[0]){
 						// set user name
 						users.setUserName(reqBody.user_id, params[1])
-					} else if(action_setImage == params[0]){
+					} else if(action.setimage == params[0]){
 						// set user image
 						users.setUserImage(reqBody.user_id, params[1])
 					}
 					
 					// IM ON
-					else if(action_imon == params[0]){
+					else if(action.imon == params[0]){
 						// send "I'm On" message
 						sendImOn(null, users.getUser(reqBody.user_id));
 					}
@@ -322,19 +323,19 @@ function getJoinAttachment(username, ask=true, user){
 
 				"actions": [
 					{
-						"name": action_join,
+						"name": action.join,
 						"value": "yes",
 						"text": "Yes",
 						"type": "button"
 					},
 					{
-						"name": action_join,
+						"name": action.join,
 						"value": "maybe",
 						"text": "Maybe",
 						"type": "button"
 					},
 					{
-						"name": action_join,
+						"name": action.join,
 						"value": "no",
 						"text": "No",
 						"type": "button"
@@ -459,26 +460,26 @@ function sendImOnAt_Menu(responseURL, payload){
 				"actions": [
 				// 1200 500 8-900
 					{
-						"name": action_getingon,
+						"name": action.gettingon,
 						"value": "12:00 PM Today",
 						"text": "12:00 PM",
 						"type": "button"
 					},
 					{
-						"name": action_getingon,
+						"name": action.gettingon,
 						"value": "5:00 PM Today",
 						"text": "5:00 PM",
 						"type": "button"
 					},
 					{
-						"name": action_getingon,
+						"name": action.gettingon,
 						"value": "8-9:00 PM Today",
 						"text": "8-9:00 PM",
 						"type": "button"
 					},
 				// start custom time sequence
 					{
-						"name": action_getingon_start,
+						"name": action.gettingon_start,
 						"value": "submit custon",
 						"text": "Custom Time",
 						"type": "button"
@@ -504,7 +505,7 @@ function sendImOnAt_Start(responseURL, payload){
 				"actions": [
 				// 1-12
 					{
-				    "name": action_getingon_hour,
+				    "name": action.gettingon_hour,
                     "text": "Hour...",
                     "type": "select",
                     "options": [
@@ -579,7 +580,7 @@ function sendImOnAt_AmPm(responseURL, payload){
 				"actions": [
 				// am | pm
 					{
-				    "name": action_getingon_amp,
+				    "name": action.gettingon_amp,
                     "text": "AM/PM...",
                     "type": "select",
                     "options": [
@@ -595,7 +596,7 @@ function sendImOnAt_AmPm(responseURL, payload){
 					},
 				// re-starts custom time sequence
 					{
-						"name": action_getingon_start,
+						"name": action.gettingon_start,
 						"value": "submit custon",
 						"text": "Re-select",
 						"type": "button"
@@ -621,7 +622,7 @@ function sendImOnAt_Day(responseURL, payload){
 				"actions": [
 				// Today | Tommorow | Tuesday | Friday | Saturday | Sunday
 					{
-				    "name": action_getingon_day,
+				    "name": action.gettingon_day,
                     "text": "Day...",
                     "type": "select",
                     "options": [
@@ -653,7 +654,7 @@ function sendImOnAt_Day(responseURL, payload){
 					},
 				// re-starts custom time sequence
 					{
-						"name": action_getingon_start,
+						"name": action.gettingon_start,
 						"value": "submit custon",
 						"text": "Re-select",
 						"type": "button"
@@ -692,20 +693,20 @@ function sendBasicMenu(responseURL){
 				"attachment_type": "default",
 				"actions": [
 					{
-						"name": action_imon,
-						"value": action_imon,
+						"name": action.imon,
+						"value": action.imon,
 						"text": "I'm On!",
 						"type": "button"
 					},
 					{
-						"name": action_onatmenu,
-						"value": action_onatmenu,
+						"name": action.gettingon_menu,
+						"value": action.gettingon_menu,
 						"text": "I'm On At:",
 						"type": "button"
 					},
 					{
-						"name": action_askgeton,
-						"value": action_askgeton,
+						"name": action.askgeton,
+						"value": action.askgeton,
 						"text": "Getting On?",
 						"type": "button"
 					}
