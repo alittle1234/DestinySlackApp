@@ -4,7 +4,7 @@ var bodyParser = require('body-parser')
 var app = express();
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
-var db = require('./db');
+var users = require('./user');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -15,42 +15,47 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 
-
+/* 
+* 	return the index page
+*/
 app.get('/', function(req, res) {
-  res.render('pages/index2');
+	res.render('pages/index2');
 });
 
-var users = {};
-db.getUsers(users, null);
 
-function printUsers(users, req, res){
+/* 
+* 
+*/
+app.listen(app.get('port'), function() {
+	console.log('Node app is running on port', app.get('port'));
+});
+
+
+
+
+/* 
+* 	return all users json
+*/
+function printUsers(userData, req, res){
 	console.log('printUsers...');
-	console.log(JSON.stringify(users, null, 2));
-	res.send(JSON.stringify(users, null, 2));
+	console.log(JSON.stringify(userData, null, 2));
+	res.send(JSON.stringify(userData, null, 2));
 }
 
-function getUsers(callback){
-	console.log('getUsers...');
-	db.getUsers(users, callback);
-}
-
-function storeUsers(){
-	console.log('storeUsers...');
-	db.storeUsers(users);
-}
-
+/* 
+* 	handle get: return user json
+*/
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	getUsers(printUsers.bind(this, users, req, res));
+	users.getUsers(printUsers.bind(this, users.getUserCache, req, res));
 	console.log('Done fetching users...');
 });
 
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
 
 
-// end point for /d command
+/* 
+* 	handle post: end point for /d command
+*/
 app.post('/d', urlencodedParser, function(req, res) {
     if (!req.body) {
 		console.error('no req body' + req);
@@ -60,7 +65,10 @@ app.post('/d', urlencodedParser, function(req, res) {
 	handleDestinyReq(req, res);
 });
 
-// endpoint for button actions
+
+/* 
+* 	handle post:  endpoint for button actions
+*/
 app.post('/d/actions', urlencodedParser, function(req, res) {
     if (!req.body) {
 		console.error('no req body' + req);
@@ -70,24 +78,37 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 	handleDestinyReq(req, res);
 });
 
-var action_imon = "imon";
-var action_join = "join";
+var icon_url = ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
+var app_name = "Destiny App";
+var general_webhook = "https://hooks.slack.com/services/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";
 
+var menu_color 		= "#3AA3E3";
+var invite_color 	= "#31110A";
+var join_ask 		= "Join them?";
+
+var join_im_on_callback = "join_im_on";
 var imon_cache = [];
-var action_getingon = "getingonat";
 
-var action_onatmenu = "onatmenu";
-var action_getingon_start = "onat_start";
-var action_getingon_hour = "onat_hour";
-var action_getingon_amp = "onat_ampm";
-var action_getingon_day = "onat_day";
+var action_imon 			= "imon";
+var action_join 			= "join";
 
-var action_askgeton = "askgeton";
+var action_getingon 		= "getingonat";
 
-var action_setName = "name";
-var action_setImage = "image";
+var action_onatmenu 		= "onatmenu";
+var action_getingon_start 	= "onat_start";
+var action_getingon_hour 	= "onat_hour";
+var action_getingon_amp 	= "onat_ampm";
+var action_getingon_day 	= "onat_day";
 
-// handle all the destiny app requests
+var action_askgeton 		= "askgeton";
+
+var action_setName 			= "name";
+var action_setImage 		= "image";
+
+
+/* 
+* 	handle all the destiny app requests
+*/
 function handleDestinyReq(req, res){
 	res.status(200).end(); // prevents weird time-out response
 	
@@ -146,9 +167,11 @@ function handleDestinyReq(req, res){
 				}
 				
 				
+				// TODO not fully implemented
 				else if(action_askgeton == actionName){
 					sendAskGetOn(payload, payload.user);
 				}
+				
 				
 				// JOIN ACTION
 				else if(action_join == actionName){
@@ -174,16 +197,16 @@ function handleDestinyReq(req, res){
 					var params = reqBody.text.split(' ');
 					if(action_setName == params[0]){
 						// set user name
-						setUserName(reqBody.user_id, params[1])
+						users.setUserName(reqBody.user_id, params[1])
 					} else if(action_setImage == params[0]){
 						// set user image
-						setUserImage(reqBody.user_id, params[1])
+						users.setUserImage(reqBody.user_id, params[1])
 					}
 					
 					// IM ON
 					else if(action_imon == params[0]){
 						// send "I'm On" message
-						sendImOn(null, users[reqBody.user_id]);
+						sendImOn(null, users.getUser(reqBody.user_id));
 					}
 				}
 			}
@@ -197,80 +220,6 @@ function handleDestinyReq(req, res){
 	}
 }
 
-var icon_url = ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
-var app_name = "Destiny App";
-var general_webhook = "https://hooks.slack.com/services/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";
-
-var menu_color = "#3AA3E3";
-var invite_color = "#31110A";
-var join_ask = "Join them?";
-
-var join_im_on_callback = "join_im_on";
-var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab9229b8164aff89c7801f332b54c.jpg";
-//"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
-
-// lookup thumbnail for most recent player background
-function getThumbUrl(user){
-	if(users && users[user.id]
-		&& users[user.id].img_url){
-		console.log('getThumbUrl...' + users[user.id].img_url  );
-		return users[user.id].img_url;
-	}
-	return def_thum_url;
-}
-
-// get associated destiny name
-function getPlayerName(user){
-	if(users && users[user.id]
-		&& users[user.id].destiny_name){
-		return users[user.id].destiny_name;
-	}
-	return user.name;
-}
-
-function setAndStoreUser(userId, name, image){
-	console.log('setAndStoreUser...' + userId + ' ' + name + ' ' + image  );
-	
-	if(!users[userId]){
-		console.log('new user...');
-		users[userId] = {
-					"id":userId,
-					"img_url":image,
-					"destiny_name":name
-				};
-	}
-	
-	users[userId].id = userId;
-	if(name){
-		users[userId].destiny_name = name;
-	}
-	if(image){
-		users[userId].img_url = image;
-	}
-	
-	console.log('Users Pre-Store...');
-	console.log(JSON.stringify(users, null, 2));
-	
-	storeUsers();
-}
-
-function setUserName(userId, name){
-	console.log('setUserName...');
-	if(!users || !users[userId]){
-		getUsers(setAndStoreUser.bind(this, userId, name, null));
-	}else{
-		setAndStoreUser(userId, name, null);
-	}
-}
-
-function setUserImage(userId, image){
-	console.log('setUserImage...');
-	if(!users || !users[userId]){
-		getUsers(setAndStoreUser.bind(this, userId, null, image));
-	}else{
-		setAndStoreUser(userId, null, image);
-	}
-}
 
 /* sends a "Player is on!" message
 *
@@ -282,7 +231,7 @@ function sendImOn(payload, user){
 	// clear private message
 	if(payload) clearPrivate(payload.response_url);
 	
-	var username = getPlayerName(user);
+	var username = users.getPlayerName(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
 	
 	var message = {
@@ -315,7 +264,7 @@ function sendGettingOn(payload, user){
 	
 	imon_cache[payload.user.id] = null;
 	
-	var username = getPlayerName(user);
+	var username = users.getPlayerName(user);
 	var title = "_*" + username + "*" + " is getting on Destiny at:_\n";
 	title += "*"+time_day+"*";
 	
@@ -343,7 +292,7 @@ function sendAskGetOn(payload, user){
 	
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
-	var username = getPlayerName(user);
+	var username = users.getPlayerName(user);
 	var title = "*" + username + ":* " +"_Is anyone getting on Destiny " + time + "?_";
 	
 	var message = {
@@ -368,7 +317,7 @@ function getJoinAttachment(username, ask=true, user){
 				"callback_id": join_im_on_callback,
 				"color": invite_color,
 				"attachment_type": "default", // TODO what is this?
-				"thumb_url": getThumbUrl(user),
+				"thumb_url": users.getThumbUrl(user),
 
 				"actions": [
 					{
@@ -393,7 +342,8 @@ function getJoinAttachment(username, ask=true, user){
 			}
 }
 
-/* the "poll results" attachment with fields
+/* 
+*	the "poll results" attachment with fields
 */
 function getPollAttachment(fieldArray){
 	return {
