@@ -90,6 +90,11 @@ var join_ask 		= "Join them?";
 var join_im_on_callback = "join_im_on";
 var imon_cache = [];
 
+
+/* 
+* 	menu actions
+*		actions to perform in web app based on the id of action
+*/
 var action = {
 	imon : 				"imon",
 	join : 				"join",
@@ -106,6 +111,17 @@ var action = {
 	setname : 			"name",
 	setimage : 			"image",
 };
+
+
+/* 
+* 	destiny activity types
+*/
+var activity = {
+	raid : 		"Raid",
+	trials : 	"Trials",
+	pvp : 		"PvP",
+	strike : 	"Strike",
+}
 
 
 /* 
