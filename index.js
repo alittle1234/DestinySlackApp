@@ -5,6 +5,7 @@ var app = express();
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 var users = require('./user');
+var site = require('./site');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -80,7 +81,7 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 
 var icon_url = ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
 var app_name = "Destiny App";
-var general_webhook = "https://hooks.slack.com/services/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";
+var general_webhook = site.generalWebhook;
 
 var menu_color 		= "#3AA3E3";
 var invite_color 	= "#31110A";
@@ -354,7 +355,8 @@ function getPollAttachment(fieldArray){
 			}
 }
 
-/* 	handles join action for all join attachments
+/* 	
+*	handles join action for all join attachments
 * 	join poll becomes second attachment to all messages
 *	contains the names of users who clicked yes, no, maybe 
 */
