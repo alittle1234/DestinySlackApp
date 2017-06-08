@@ -5,7 +5,7 @@ var db = require('./db');
 var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab9229b8164aff89c7801f332b54c.jpg";
 //"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
-var users_cache = {};
+var users_cache = null;
 db.getUsers(users_cache, null);
 
 /* 
@@ -18,18 +18,36 @@ module.exports.getUserCache = function (){
 /* 
 * 	get a user obj
 */
-module.exports.getUser = function (userId){
+module.exports.getUser = function (userId, userName, callback){
 	console.log('user.getUser(userId)...');
 	// check cache not null
 		// get lates users --> async
+	if(!users_cache || users_cache == null){
+		db.getUsers(users_cache, getUser.bind(this, userId, userName, callback)  ); // LOOP? define "getUser" as call back to call again when not itizlized
+		return;
+	}
 		
 	// if user null
 		// store new user w/ id --> async
-		// return empty user?
+	if(!users_cache[userId]){
+		setAndStoreUser(userId, userName);
+	}
 		
 	// else return user
-	return users_cache[userId];
+	callback( users_cache[userId] );
 }
+
+
+function newUser(userId, userName, imgUrl, bungieId){
+	return {
+			"id" :				userId,
+			"name" :			userName,
+			"img_url" :			imgUrl,
+			"destiny_name" :	name,
+			"bungie_id" :		bungieId
+	};
+}
+
 
 /* 
 * 	get latest users
@@ -67,25 +85,23 @@ module.exports.getPlayerName = function (user){
 /* 
 * 	set the name or image url of a user and store in the database
 */
-module.exports.setAndStoreUser = function (userId, name, image){
+module.exports.setAndStoreUser = function (userId, name, image, bungieId){
 	console.log('setAndStoreUser...' + userId + ' ' + name + ' ' + image  );
 	
 	if(!users_cache[userId]){
 		console.log('new user...');
-		users_cache[userId] = {
-					"id":userId,
-					"img_url":image,
-					"destiny_name":name
-				};
+		users_cache[userId] = newUser(userId, null, name, image, bungieId);
+	}else{
+		
+		users_cache[userId].id = userId; // TODO im not sure what the point of this is
+		if(name){
+			users_cache[userId].destiny_name = name;
+		}
+		if(image){
+			users_cache[userId].img_url = image;
+		}
 	}
 	
-	users_cache[userId].id = userId;
-	if(name){
-		users_cache[userId].destiny_name = name;
-	}
-	if(image){
-		users_cache[userId].img_url = image;
-	}
 	
 	console.log('Users Pre-Store...');
 	console.log(JSON.stringify(users_cache, null, 2));

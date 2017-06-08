@@ -224,7 +224,9 @@ function handleDestinyReq(req, res){
 					// IM ON
 					else if(action.imon == params[0]){
 						// send "I'm On" message
-						sendImOn(null, users.getUser(reqBody.user_id));
+						users.getUser(reqBody.user_id, null, function(user){
+							sendImOn(null, user);
+						} );
 					}
 				}
 			}
@@ -246,6 +248,10 @@ function handleDestinyReq(req, res){
 *
 */
 function sendImOn(payload, user){
+	console.log('SendImOn: \n' + "payload:" + JSON.stringify(payload, null, 2)
+	+ "user:" + JSON.stringify(user, null, 2));
+	
+	
 	// clear private message
 	if(payload) clearPrivate(payload.response_url);
 	

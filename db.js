@@ -29,7 +29,8 @@ module.exports.getUsers = function(users, setUsers) {
 								"id":row.id,
 								"name":row.name,
 								"img_url":row.img_url,
-								"destiny_name":row.destiny_name
+								"destiny_name":row.destiny_name,
+								"bungie_id":row.bungie_id
 							};
 						});
 		
@@ -78,8 +79,8 @@ module.exports.storeUsers = function(users) {
 						   
 					if(ids[user.id]){
 						console.log('Updating...');
-						client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3) WHERE id=($4::varchar);',
-							[user.name, user.img_url, user.destiny_name, user.id],
+						client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3), bungie_id=($4) WHERE id=($5::varchar);',
+							[user.name, user.img_url, user.destiny_name, user.bungie_id, user.id],
 							function (err, result) {
 								console.log('Update Full Complete...');
 								if (err) {
@@ -89,9 +90,9 @@ module.exports.storeUsers = function(users) {
 					   );
 					}else{
 						console.log('Inserting...');
-						client.query('INSERT INTO users(id, name, img_url, destiny_name) ' +
-							'VALUES($1, $2, $3, $4);',
-							[user.id, user.name, user.img_url, user.destiny_name],
+						client.query('INSERT INTO users(id, name, img_url, destiny_name, bungie_id) ' +
+							'VALUES($1, $2, $3, $4, $5);',
+							[user.id, user.name, user.img_url, user.destiny_name, user.bungie_id],
 								function (err, result) {
 									console.log('Insert Complete...');
 									if (err) {
