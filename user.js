@@ -23,10 +23,17 @@ module.exports.getUser = function (userId, userName, callback){
 	// check cache not null
 		// get lates users --> async
 	if(!users_cache || users_cache == null){
-		db.getUsers(users_cache, getUser.bind(this, userId, userName, callback)  ); // LOOP? define "getUser" as call back to call again when not itizlized
+		db.getUsers(users_cache, function(){
+			localGetUser(userId, userName, callback);
+		}  );
 		return;
 	}
 		
+	localGetUser(userId, userName, callback);
+}
+
+function localGetUser(userId, userName, callback){
+	console.log('user.localGetUser(userId)...');
 	// if user null
 		// store new user w/ id --> async
 	if(!users_cache[userId]){
@@ -53,7 +60,7 @@ function newUser(userId, userName, imgUrl, bungieId){
 * 	get latest users
 */
 module.exports.getUsers = function (callback){
-	console.log('user.getUsers(cb)...');
+	console.log('user.getUsers(db)...');
 	db.getUsers(users_cache, callback);
 }
 
