@@ -418,9 +418,21 @@ function handleJoin(payload){
                 }
             ];
 			
+	// find attachement with poll data
+	var pollIndex = 1;
+	if(message.attachments){
+		for(var i = 1; i < message.attachments.length; i++){
+			if(message.attachments[i].callback_id == join_poll_attach_id){
+				pollIndex = i;
+				break;
+			}
+		}
+	}
+	
+	
 	// remove user from field if exist
-	if(message.attachments[1] && message.attachments[1].fields){
-		fieldsArray = message.attachments[1].fields;
+	if(message.attachments[pollIndex] && message.attachments[pollIndex].fields){
+		fieldsArray = message.attachments[pollIndex].fields;
 		for (var i = 0; i < fieldsArray.length; i++) {
 			if(fieldsArray[i].value){
 				var vals = fieldsArray[i].value.split(fieldValSplit);
@@ -450,7 +462,7 @@ function handleJoin(payload){
 	fieldsArray[fieldNum].value += username + "\n";
 	
 	// set second attachment as fields
-	message.attachments[1] = getPollAttachment(fieldsArray);
+	message.attachments[pollIndex] = getPollAttachment(fieldsArray);
 	// replace original
 	message.replace_original = true;
 	
