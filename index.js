@@ -252,7 +252,7 @@ function handleDestinyReq(req, res){
 */
 function sendImOn(payload, user){
 	console.log('SendImOn: \n' + "payload:" + JSON.stringify(payload, null, 2)
-	+ "user:" + JSON.stringify(user, null, 2));
+	+ "\n user:" + JSON.stringify(user, null, 2));
 	
 	
 	// clear private message

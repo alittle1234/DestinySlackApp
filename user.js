@@ -6,7 +6,13 @@ var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab922
 //"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
 var users_cache = null;
-db.getUsers(users_cache, null);
+db.getUsers(function(userData){
+	users_cache = userData;
+});
+
+function localSetUserCache(userData){
+	users_cache = userData;
+}
 
 /* 
 * 	get a user obj
@@ -23,8 +29,8 @@ module.exports.getUser = function (userId, userName, callback){
 	// check cache not null
 		// get lates users --> async
 	if(!users_cache || users_cache == null){
-		db.getUsers(users_cache, function(userArray){
-			users_cache = userArray;
+		db.getUsers(function(userData){
+			localSetUserCache(userData);
 			localGetUser(userId, userName, callback);
 		}  );
 		return;
@@ -38,7 +44,7 @@ function localGetUser(userId, userName, callback){
 	// if user null
 		// store new user w/ id --> async
 	if(!users_cache[userId]){
-		setAndStoreUser(userId, userName);
+		exports.setAndStoreUser(userId, userName);
 	}
 		
 	// else return user
@@ -62,7 +68,7 @@ function newUser(userId, userName, imgUrl, bungieId){
 */
 module.exports.getUsers = function (callback){
 	console.log('user.getUsers(db)...');
-	db.getUsers(users_cache, callback);
+	db.getUsers(callback);
 }
 
 
@@ -134,9 +140,12 @@ module.exports.setUserName = function (userId, name){
 	console.log('setUserName...');
 	if(!users_cache || !users_cache[userId]){
 		// get latest users than add new data to db
-		getUsers(setAndStoreUser.bind(this, userId, name, null));
+		exports.getUsers(function(userData){
+			localSetUserCache(userData);
+			exports.setAndStoreUser(userId, name, null);
+		});
 	}else{
-		setAndStoreUser(userId, name, null);
+		exports.setAndStoreUser(userId, name, null);
 	}
 }
 
@@ -147,8 +156,11 @@ module.exports.setUserImage = function (userId, image){
 	console.log('setUserImage...');
 	if(!users_cache || !users_cache[userId]){
 		// get latest users than add new data to db
-		getUsers(setAndStoreUser.bind(this, userId, null, image));
+		exports.getUsers(function(userData){
+			localSetUserCache(userData);
+			exports.setAndStoreUser(userId, null, image);
+		});
 	}else{
-		setAndStoreUser(userId, null, image);
+		exports.setAndStoreUser(userId, null, image);
 	}
 }

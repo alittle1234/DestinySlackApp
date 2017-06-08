@@ -2,18 +2,14 @@ var pg = require('pg');
 pg.defaults.ssl = true;
 
 
-module.exports.getUsers = function(unused, setUsers) {
-	//var usersa = [];
+module.exports.getUsers = function(setUsers) {
 	console.log('Get Users...');
 	
-	var users = {};
-	const uOut = [];
-	
-	const results = [];
+	var users = {}; // populate this map
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 		console.log('Connecting...');
-		const uIn = [];
+		
 		// Handle connection errors
 		if(err) {
 			done();
@@ -37,19 +33,13 @@ module.exports.getUsers = function(unused, setUsers) {
 								"bungie_id" :	row.bungie_id
 							};
 							users[uId] = u;
-							uIn[uId] = u;
-							uOut[uId] = u;
-							results.push(u);
 						});
 						
 		query.on('end', function() {
 			done();
-			// return results;
+			
 			console.log('Done...');
 			console.log('Done Method: Users:' + JSON.stringify(users));
-			console.log('Done Method: uIn:' + (uIn) ? JSON.stringify(uIn) : " is null ");
-			console.log('Done Method: uOut:' + (uOut) ? JSON.stringify(uOut)  : " is null ");
-			console.log('Results: ' + JSON.stringify(results, null, 2));
 			if(setUsers) setUsers(users);
 		});
 	});
