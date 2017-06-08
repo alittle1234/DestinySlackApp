@@ -2,17 +2,17 @@ var pg = require('pg');
 pg.defaults.ssl = true;
 
 
-module.exports.getUsers = function(users, setUsers) {
+module.exports.getUsers = function(unused, setUsers) {
 	//var usersa = [];
 	console.log('Get Users...');
 	
-	if(!users){
-		users = [];
-	}
+	var users = [];
+	const uOut = [];
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 		console.log('Connecting...');
-		const results = [];
+		const results = []; // why this defined here?
+		const uIn = [];
 		// Handle connection errors
 		if(err) {
 			done();
@@ -28,25 +28,25 @@ module.exports.getUsers = function(users, setUsers) {
 							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
 							var uId = row.id;
-							users[uId] = {
-								"id":row.id,
-								"name":row.name,
-								"img_url":row.img_url,
-								"destiny_name":row.destiny_name,
-								"bungie_id":row.bungie_id
+							var u = {
+								"id" :			row.id,
+								"name" :		row.name,
+								"img_url" :		row.img_url,
+								"destiny_name" :row.destiny_name,
+								"bungie_id" :	row.bungie_id
 							};
+							users[uId] = u;
+							uIn[uId] = u;
+							uOut[uId] = u;
 						});
-		
-		
-		
-		// After all data is returned, close connection and return results
-		
-		console.log('Finish...');
+						
 		query.on('end', function() {
 			done();
 			// return results;
 			console.log('Done...');
-			console.log('Done Method: ' + JSON.stringify(users));
+			console.log('Done Method: Users:' + JSON.stringify(users));
+			console.log('Done Method: uIn:' + (uIn) ? JSON.stringify(uIn) : " is null ");
+			console.log('Done Method: uOut:' + (uOut) ? JSON.stringify(uOut)  : " is null ");
 			if(setUsers) setUsers(users);
 		});
 	});
