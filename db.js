@@ -6,6 +6,9 @@ module.exports.getUsers = function(users, setUsers) {
 	//var usersa = [];
 	console.log('Get Users...');
 	
+	if(!users){
+		users = [];
+	}
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 		console.log('Connecting...');
