@@ -391,6 +391,7 @@ function getPollAttachment(fieldArray){
 *	contains the names of users who clicked yes, no, maybe 
 */
 function handleJoin(payload){
+	var fieldValSplit = ",";
 	//console.log('payload: \n' + JSON.stringify(payload, null, 2));
 	// get message as original message
 	var message = payload.original_message;
@@ -402,17 +403,17 @@ function handleJoin(payload){
                 {
                     "title": "Yes",
                     "value": "",
-                    "short": true
+                    "short": false
                 },
 				{
                     "title": "Maybe",
                     "value": "",
-                    "short": true
+                    "short": false
                 },
 				{
                     "title": "No",
                     "value": "",
-                    "short": true
+                    "short": false
                 }
             ];
 			
@@ -421,15 +422,15 @@ function handleJoin(payload){
 		fieldsArray = message.attachments[1].fields;
 		for (var i = 0; i < fieldsArray.length; i++) {
 			if(fieldsArray[i].value){
-				var vals = fieldsArray[i].value.split("\n");
+				var vals = fieldsArray[i].value.split(fieldValSplit);
 				// reset field value property
 				fieldsArray[i].value = "";
 				for (var k = 0; k < vals.length; k++) {
 					var v = vals[k];
 					if(v){
-						v = v.replace("\n", "").trim();
+						v = v.replace(fieldValSplit, "").trim();
 						if(v && v != username && v.length > 0){
-							fieldsArray[i].value += v + "\n";
+							fieldsArray[i].value += v + fieldValSplit;
 						}
 					}
 					
