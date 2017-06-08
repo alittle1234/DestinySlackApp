@@ -9,9 +9,10 @@ module.exports.getUsers = function(unused, setUsers) {
 	var users = [];
 	const uOut = [];
 	
+	const results = [];
+	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 		console.log('Connecting...');
-		const results = []; // why this defined here?
 		const uIn = [];
 		// Handle connection errors
 		if(err) {
@@ -38,6 +39,7 @@ module.exports.getUsers = function(unused, setUsers) {
 							users[uId] = u;
 							uIn[uId] = u;
 							uOut[uId] = u;
+							results.push(u);
 						});
 						
 		query.on('end', function() {
@@ -47,6 +49,7 @@ module.exports.getUsers = function(unused, setUsers) {
 			console.log('Done Method: Users:' + JSON.stringify(users));
 			console.log('Done Method: uIn:' + (uIn) ? JSON.stringify(uIn) : " is null ");
 			console.log('Done Method: uOut:' + (uOut) ? JSON.stringify(uOut)  : " is null ");
+			console.log('Results: ' + JSON.stringify(results, null, 2));
 			if(setUsers) setUsers(users);
 		});
 	});
