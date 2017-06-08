@@ -445,7 +445,7 @@ function handleJoin(payload){
 						v = v.replace(fieldValSplit, "").trim();
 						// add values back that are not current user
 						if(v && v.length > 0 && v != username){
-							fieldsArray[i].value += (i > 0 ? fieldValSplit : "") + v ;
+							fieldsArray[i].value += (k > 0 ? fieldValSplit : "") + v ;
 							hasValues[i] = true;
 						}
 					}
