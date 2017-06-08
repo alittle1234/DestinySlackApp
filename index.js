@@ -137,23 +137,18 @@ function handleDestinyReq(req, res){
 	try{
 		if(req.body){
 			var reqBody = req.body;
-			// var message2 = {
-						// "text": " payload: \n"
-						 // + JSON.stringify(reqBody, null, 2),
-						// "replace_original": false
-					// }
-					// sendMessageToSlackResponseURL(req.body.response_url, message2);
 					
 			// TODO add bot, text scaning
 			// TODO complete anyone getting on?
 			// TODO move methods to classes?
 			// TODO add ACTIVITY types (raid, pvp, pve, trials)
 			
-			var payload;
-			if(req.body.payload){ // an action button was clicked
-				console.log('payload: ' + JSON.stringify(req.body.payload, null, 2) );
+			
+			if(reqBody.payload){ // an action button was clicked
+				var payload = JSON.parse(reqBody.payload); // turn payload into json obj
 				
-				payload = JSON.parse(req.body.payload); // turn payload into json obj
+				console.log('payload: ' + JSON.stringify(payload, null, 2) );
+				
 				var actionName = payload.actions[0].name;
 				
 				// SEND MESSAGE -- IM ON
@@ -211,7 +206,7 @@ function handleDestinyReq(req, res){
 				}
 			}else{
 				// SLASH COMMANDS
-				console.log('ReqBody: ' + JSON.stringify(req.body, null, 2) );
+				console.log('ReqBody: ' + JSON.stringify(reqBody, null, 2) );
 				
 				if(!reqBody.text || reqBody.text.trim() == ""){
 					// show basic menu
@@ -241,8 +236,6 @@ function handleDestinyReq(req, res){
 		}
 	}catch(e){
 		console.error(e.message);
-		
-		//console.log('payload: \n' + JSON.stringify(req, null, 2));
 	}
 }
 
