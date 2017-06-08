@@ -151,6 +151,8 @@ function handleDestinyReq(req, res){
 			
 			var payload;
 			if(req.body.payload){ // an action button was clicked
+				console.log('payload: ' + JSON.stringify(req.body.payload, null, 2) );
+				
 				payload = JSON.parse(req.body.payload); // turn payload into json obj
 				var actionName = payload.actions[0].name;
 				
@@ -209,6 +211,7 @@ function handleDestinyReq(req, res){
 				}
 			}else{
 				// SLASH COMMANDS
+				console.log('ReqBody: ' + JSON.stringify(req.body, null, 2) );
 				
 				if(!reqBody.text || reqBody.text.trim() == ""){
 					// show basic menu
