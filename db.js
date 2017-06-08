@@ -6,7 +6,7 @@ module.exports.getUsers = function(unused, setUsers) {
 	//var usersa = [];
 	console.log('Get Users...');
 	
-	var users = [];
+	var users = {};
 	const uOut = [];
 	
 	const results = [];
