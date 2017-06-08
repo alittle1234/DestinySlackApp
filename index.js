@@ -48,7 +48,7 @@ function printUsers(userData, req, res){
 */
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	users.getUsers(null, function(userData){
+	users.getUsers(function(userData){
 		console.log('Performing Callback...');
 		printUsers(userData, req, res);
 	});
