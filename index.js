@@ -239,6 +239,14 @@ function handleDestinyReq(req, res){
 	}
 }
 
+/*
+*	return the slack format name reference with player name
+*
+*/
+function getNameRef(user){
+	// <@U024BE7LH|bob>
+	return "<@" + user.id + "|" + users.getPlayerName(user) + ">";
+}
 
 /* sends a "Player is on!" message
 *
@@ -254,7 +262,7 @@ function sendImOn(payload, user){
 	// clear private message
 	if(payload) clearPrivate(payload.response_url);
 	
-	var username = users.getPlayerName(user);
+	var username = getNameRef(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
 	
 	var message = {
@@ -287,7 +295,7 @@ function sendGettingOn(payload, user){
 	
 	imon_cache[payload.user.id] = null;
 	
-	var username = users.getPlayerName(user);
+	var username = getNameRef(user);
 	var title = "_*" + username + "*" + " is getting on Destiny at:_\n";
 	title += "*"+time_day+"*";
 	
@@ -315,7 +323,7 @@ function sendAskGetOn(payload, user){
 	
 	var time = "Today"; // Tonight | Tommorow | this Weekend
 	
-	var username = users.getPlayerName(user);
+	var username = getNameRef(user);
 	var title = "*" + username + ":* " +"_Is anyone getting on Destiny " + time + "?_";
 	
 	var message = {
