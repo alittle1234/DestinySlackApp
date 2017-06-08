@@ -90,7 +90,8 @@ var menu_color 		= "#3AA3E3";
 var invite_color 	= "#31110A";
 var join_ask 		= "Join them?";
 
-var join_im_on_callback = "join_im_on";
+var join_attach_id = "join_actions";
+var join_poll_attach_id = "join_poll";
 var imon_cache = [];
 
 
@@ -245,7 +246,7 @@ function handleDestinyReq(req, res){
 */
 function getNameRef(user){
 	// <@U024BE7LH|bob>
-	return "<@" + user.id + "|" + users.getPlayerName(user) + ">";
+	return users.getPlayerName(user);
 }
 
 /* sends a "Player is on!" message
@@ -345,7 +346,7 @@ function getJoinAttachment(username, ask=true, user){
 	return {
 				"text": ask ? join_ask : "",
 				"fallback": "Join " + username + " on Destiny?",
-				"callback_id": join_im_on_callback,
+				"callback_id": join_attach_id,
 				"color": invite_color,
 				"attachment_type": "default", // TODO what is this?
 				"thumb_url": users.getThumbUrl(user),
@@ -378,7 +379,7 @@ function getJoinAttachment(username, ask=true, user){
 */
 function getPollAttachment(fieldArray){
 	return {
-				
+				"callback_id": join_poll_attach_id,
 				"fallback": "Join Poll",
 				"color": invite_color,
 				"fields": fieldArray
@@ -396,7 +397,7 @@ function handleJoin(payload){
 	// get message as original message
 	var message = payload.original_message;
 	
-	var username = payload.user.name;
+	var username = getNameRef(payload.user);
 	var choice = payload.actions[0].value;
 	// "fields":
 	var fieldsArray =  [
