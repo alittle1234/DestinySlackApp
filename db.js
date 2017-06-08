@@ -47,7 +47,7 @@ module.exports.getUsers = function(users, setUsers) {
 			// return results;
 			console.log('Done...');
 			console.log('Done Method: ' + JSON.stringify(users));
-			if(setUsers) setUsers();
+			if(setUsers) setUsers(users);
 		});
 	});
 };

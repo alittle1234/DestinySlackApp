@@ -23,7 +23,8 @@ module.exports.getUser = function (userId, userName, callback){
 	// check cache not null
 		// get lates users --> async
 	if(!users_cache || users_cache == null){
-		db.getUsers(users_cache, function(){
+		db.getUsers(users_cache, function(userArray){
+			users_cache = userArray;
 			localGetUser(userId, userName, callback);
 		}  );
 		return;

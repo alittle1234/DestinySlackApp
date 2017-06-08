@@ -48,8 +48,11 @@ function printUsers(userData, req, res){
 */
 app.get('/users/', function(req, res) {
 	console.log('Asking for users...');
-	users.getUsers(printUsers.bind(this, users.getUserCache, req, res));
-	console.log('Done fetching users...');
+	users.getUsers(null, function(userData){
+		console.log('Performing Callback...');
+		printUsers(userData, req, res);
+	});
+	console.log('Done Asking for users...');
 });
 
 
