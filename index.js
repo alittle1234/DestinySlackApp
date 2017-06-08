@@ -392,7 +392,7 @@ function getPollAttachment(fieldArray){
 *	contains the names of users who clicked yes, no, maybe 
 */
 function handleJoin(payload){
-	var fieldValSplit = ",";
+	var fieldValSplit = ", ";
 	//console.log('payload: \n' + JSON.stringify(payload, null, 2));
 	// get message as original message
 	var message = payload.original_message;
@@ -429,11 +429,12 @@ function handleJoin(payload){
 		}
 	}
 	
-	
+	var hasValues = [];
 	// remove user from field if exist
 	if(message.attachments[pollIndex] && message.attachments[pollIndex].fields){
 		fieldsArray = message.attachments[pollIndex].fields;
 		for (var i = 0; i < fieldsArray.length; i++) {
+			hasValues[i] = false;
 			if(fieldsArray[i].value){
 				var vals = fieldsArray[i].value.split(fieldValSplit);
 				// reset field value property
@@ -442,8 +443,10 @@ function handleJoin(payload){
 					var v = vals[k];
 					if(v){
 						v = v.replace(fieldValSplit, "").trim();
-						if(v && v != username && v.length > 0){
-							fieldsArray[i].value += v + fieldValSplit;
+						// add values back that are not current user
+						if(v && v.length > 0 && v != username){
+							fieldsArray[i].value += (i > 0 ? fieldValSplit : "") + v ;
+							hasValues[i] = true;
 						}
 					}
 					
@@ -459,7 +462,7 @@ function handleJoin(payload){
 	}else if(choice == "no"){
 		fieldNum = 2;
 	}
-	fieldsArray[fieldNum].value += username + "\n";
+	fieldsArray[fieldNum].value += (hasValues[fieldNum] ? fieldValSplit : "") + username;
 	
 	// set second attachment as fields
 	message.attachments[pollIndex] = getPollAttachment(fieldsArray);
