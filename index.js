@@ -611,14 +611,14 @@ function handleJoin(payload){
 	message.replace_original = true;
 	
 	// send message to response
-	sendMessageToSlackResponseURL(payload.response_url, message);
+	// sendMessageToSlackResponseURL(payload.response_url, message);
 	
 	console.log("Payload...");
-	console.log(JSON.stringify(payload, null, 2));
+	// console.log(JSON.stringify(payload, null, 2));
 	console.log("Message...");
-	console.log(JSON.stringify(message, null, 2));
+	// console.log(JSON.stringify(message, null, 2));
 	// try updating message with api
-	// updateMessage(payload.ts, message);
+	updateMessage(message.ts, message);
 }
 
 
