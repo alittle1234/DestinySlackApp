@@ -1,14 +1,17 @@
-var express = require('express');
-var request = require('request')
-var bodyParser = require('body-parser')
-var app = express();
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+const express = require('express');
+const app = express();
 
-var users = require('./user');
-var site = require('./site');
+const request = require('request');
+const bodyParser = require('body-parser');
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
+const querystring = require('querystring');
+
+
+const users 	= require('./user');
+const site 		= require('./site');
+const bungie 	= require('./bungie');
 
 app.set('port', (process.env.PORT || 5000));
-
 app.use(express.static(__dirname + '/public'));
 
 // views is directory for all template files
@@ -55,6 +58,118 @@ app.get('/users/', function(req, res) {
 	console.log('Done Asking for users...');
 });
 
+
+
+// Set the configuration settings
+const credentials = {
+  client: {
+    id: site.clientId,
+    secret: site.clientSecret
+  },
+  auth: {
+    tokenHost: site.tokenHost
+  }
+};
+
+// Initialize the OAuth2 Library
+const oauth2 = require('simple-oauth2').create(credentials);
+
+app.get('/oauthAsk/', function(req, res) {
+	console.log('oauthAsk...');
+	
+	console.log('oauthAsk req...');
+	console.log(req.originalUrl);
+	var q = req.originalUrl.substring("/oauthAsk/".length);
+	
+	// user has oauth token?
+		// yes... do oauth required task
+		// no... request auth from user via redirect
+			// get auth permision from user
+				// get auth permision from server
+					//....
+						// do oauth required task
+	var params = querystring.parse(q);
+	var userId = parseInt(params.userId);
+	var authToken = users.getAuthToken(userId);
+	var authAction = params.action; // needs more context for action...
+	if(authToken){
+		// do action
+		authAction(authAction, userId, authToken);
+	}else{
+		// do auth flow
+		authFlow(userId, function(authAction, userId, authToken){
+			console.log('auth flow final callback...');
+			authAction(authAction, userId, authToken);
+		});
+	}
+	
+	console.log('oauthAsk Done...');
+});
+
+
+
+
+/* 
+* 	handle bungie id from url
+*/
+app.get('/bid/', function(req, res) {
+	console.log('bid...');
+	
+	console.log('bid req...');
+	console.log(req.originalUrl);
+	var q = req.originalUrl.substring(5);
+	
+	refreshDestinyData(parseInt(querystring.parse(q).bid), function(data){
+		console.log('bid callback...');
+		console.log(JSON.stringify(data, null, 2));
+		
+		console.log(data.bid);
+		console.log(data.img);
+		console.log(data.name);
+		
+		res.status(200).end();
+	});
+	console.log('bid Done...');
+});
+
+/* 
+* 	refresh bungie id data( name, image ) by sending get request and 
+*	 parsing response
+*/
+function refreshDestinyData (bungieId, callback){
+	console.log('refreshDestinyData(bungieId)...');
+	
+	var url = "https://www.bungie.net/en/Profile/254/" + bungieId;
+	
+	// do get on bungie profile page
+	doGetData(url,
+		function(response){
+			bungie.processDestinyPage(bungieId, response, callback);
+		});
+}
+
+/* 
+* 	perform a get request. send data collected to callback
+*/
+function doGetData(url, callback){
+	console.log('doGet...');
+	dataStr = '';
+	request
+		.get(url)
+		.on('response', function(response) {
+			console.log(response.statusCode);
+			console.log(response.headers['content-type']);
+			//console.log("response: " + JSON.stringify(response, null, 2));
+		})
+		.on("data", function(chunk) {
+			//console.log("BODY: " + chunk);
+			dataStr += chunk;
+		})
+		.on("end", function() {
+			callback(dataStr);
+		})
+	 
+}
 
 
 /* 
@@ -114,6 +229,8 @@ var action = {
 	
 	setname : 			"name",
 	setimage : 			"image",
+	
+	refreshDestiny :    "bid",
 };
 
 
@@ -187,9 +304,9 @@ function handleDestinyReq(req, res){
 				
 				
 				// TODO not fully implemented
-				else if(action.askgeton == actionName){
+				/* else if(action.askgeton == actionName){
 					sendAskGetOn(payload, payload.user);
-				}
+				} */
 				
 				
 				// JOIN ACTION
@@ -215,12 +332,36 @@ function handleDestinyReq(req, res){
 				}else{
 					// parse into command and parameters
 					var params = reqBody.text.split(' ');
+					
+					// set user name
 					if(action.setname == params[0]){
-						// set user name
 						users.setUserName(reqBody.user_id, params[1])
+					
+					// set user image
 					} else if(action.setimage == params[0]){
-						// set user image
 						users.setUserImage(reqBody.user_id, params[1])
+					
+					// refresh destiny data
+					} else if(action.refreshDestiny == params[0]){
+						// get id, validate long
+						var bid = params[1];
+						if(bid && parseInt(bid)){
+							// function (bungieId, callback)
+							refreshDestinyData(parseInt(bid), function(data){
+								console.log('refreshDestinyData callback...');
+								console.log(JSON.stringify(data, null, 2));
+								
+								console.log(data.bid);
+								console.log(data.img);
+								console.log(data.name);
+								
+								//setAndStoreUser = function (userId, name, image, bungieId){
+								users.setAndStoreUser(reqBody.user_id, data.name, data.img, data.bid);
+								// TODO respond with current user data
+							});
+						}else{
+							// TODO respond with current user data
+						}
 					}
 					
 					// IM ON
@@ -310,7 +451,7 @@ function sendGettingOn(payload, user){
 		]
 	};
 	
-			//{"text": "req payload: \n" + JSON.stringify(payload)},
+			
 			
 	sendMessageToSlackResponseURL(general_webhook, message);
 }
@@ -471,6 +612,13 @@ function handleJoin(payload){
 	
 	// send message to response
 	sendMessageToSlackResponseURL(payload.response_url, message);
+	
+	console.log("Payload...");
+	console.log(JSON.stringify(payload, null, 2));
+	console.log("Message...");
+	console.log(JSON.stringify(message, null, 2));
+	// try updating message with api
+	// updateMessage(payload.ts, message);
 }
 
 
@@ -750,12 +898,12 @@ function sendBasicMenu(responseURL){
 						"text": "I'm On At:",
 						"type": "button"
 					},
-					{
+					/* {
 						"name": action.askgeton,
 						"value": action.askgeton,
 						"text": "Getting On?",
 						"type": "button"
-					}
+					} */
 					// TODO menu type, "others"
 					// a menu drop-down of stats, status, etc
 				]
@@ -820,6 +968,57 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
         if (error){
             console.error(error);
         }
+		console.log("Response...");
+		console.log(response);
+    })
+}
+
+
+/* 
+*	send a slack api update message request
+*/
+function updateMessage(timestamp, message, token){
+	// message.channel
+	// message.text
+	// message.attachments = [{"normalAttr":"somethingElse"}]
+	// message.as_user = false?
+	
+	var data = querystring.stringify({
+		token: 		token,
+		ts: 		timestamp,
+		channel:	message.channel,
+		text:		message.text,
+		attachments:message.attachments,
+		as_user:	'false'
+    });
+	
+	sendDataToSlackApi('/chat.update/', data);
+}
+
+
+// TODO probalby needs error and response functions as params?
+function sendDataToSlackApi(methodApi, data){
+	var options = {
+		host: 'https://slack.com/api/',
+		//port: 80,
+		path: methodApi,
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': Buffer.byteLength(data)
+		}
+	};
+    
+    request(options, (error, response, body) => {
+        if (error){
+            console.error(error);
+        }
+		console.log("Response...");
+		console.log(response);
+		
+		response.on('data', function (chunk) {
+			console.log("body: " + chunk);
+		});
     })
 }
 

@@ -6,9 +6,9 @@ var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab922
 //"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
 var users_cache = null;
-db.getUsers(function(userData){
+/* db.getUsers(function(userData){
 	users_cache = userData;
-});
+}); */
 
 function localSetUserCache(userData){
 	users_cache = userData;
@@ -113,6 +113,9 @@ module.exports.setAndStoreUser = function (userId, name, image, bungieId){
 		}
 		if(image){
 			users_cache[userId].img_url = image;
+		}
+		if(bungieId){
+			users_cache[userId].bungie_id = bungieId;
 		}
 	}
 	

@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "body-parser": "1.17.2",
+    "cheerio": "1.0.0",
     "ejs": "2.5.6",
     "express": "4.15.2",
     "pg": "6.2.3",
+    "query-string": "4.3.4",
     "request": "2.81.0",
-    "cheerio": "1.0.0"
+    "simple-oauth2": "1.2.0"
   },
   "repository": {
     "type": "git",
