@@ -1,6 +1,6 @@
 
 // TODO add to db?
-module.exports.generalWebhook = "https://hooks.slack.com/services/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";
+module.exports.generalWebhook = "https://hooks.slack.com/services/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";
 module.exports.clientId = "189144639718.189164066887";
 module.exports.clientSecret = "001bbe7c9e148798db7476b847311c09";
 module.exports.verifyToken = "G4QE5HZ5mZgZC0cX1FAqw4OZ";
