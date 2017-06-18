@@ -992,33 +992,33 @@ function updateMessage(timestamp, message, token){
 		as_user:	'false'
     });
 	
-	sendDataToSlackApi('/chat.update/', data);
+	sendDataToSlackApi('chat.update/', data);
 }
 
 
 // TODO probalby needs error and response functions as params?
 function sendDataToSlackApi(methodApi, data){
 	var options = {
-		host: 'https://slack.com/api/',
-		//port: 80,
-		path: methodApi,
+		uri: 'https://slack.com/api/' + methodApi,
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
-			'Content-Length': Buffer.byteLength(data)
-		}
+			'Content-Length': data.length
+		},
+		body: data
+		
 	};
     
     request(options, (error, response, body) => {
         if (error){
             console.error(error);
         }
-		console.log("Response...");
-		//console.log(response);
+		console.log("sendDataToSlackApi Response...");
+		console.log(response);
 		
-		response.on('data', function (chunk) {
+		/* response.on('data', function (chunk) {
 			console.log("body: " + chunk);
-		});
+		}); */
     })
 }
 
