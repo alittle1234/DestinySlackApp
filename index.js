@@ -969,7 +969,7 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
             console.error(error);
         }
 		console.log("Response...");
-		console.log(response);
+		//console.log(response);
     })
 }
 
@@ -1014,7 +1014,7 @@ function sendDataToSlackApi(methodApi, data){
             console.error(error);
         }
 		console.log("Response...");
-		console.log(response);
+		//console.log(response);
 		
 		response.on('data', function (chunk) {
 			console.log("body: " + chunk);
