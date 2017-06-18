@@ -4,7 +4,7 @@ module.exports.generalWebhook = "https://hooks.slack.com/services/T5K48JTM4/B5JH
 module.exports.clientId = "189144639718.189164066887";
 module.exports.clientSecret = "001bbe7c9e148798db7476b847311c09";
 module.exports.verifyToken = "G4QE5HZ5mZgZC0cX1FAqw4OZ";
-module.exports.appAuthToken = "xoxp-189144639718-187772549089-188389749268-31401f9b9d91b88c756322da7212533b";
+module.exports.appAuthToken = "xoxp-189144639718-187772549089-199547087893-a14b01e6052fe3a8b8dde80148c6bfdd";
 
 // TODO not sure what this is yet, or if it is neccessary
 module.exports.tokenHost = "https://grtestdevgroup.slack.com";
