@@ -1102,6 +1102,8 @@ function sendDataToSlackApi(methodApi, data){
         }
 		console.log("sendDataToSlackApi Response...");
 		//console.log(response);
+		console.log(response.body);
+
 		
 		response.on('data', function (chunk) {
 			console.log("body: " + chunk);
