@@ -686,8 +686,21 @@ function handleJoin(payload){
 	// console.log(JSON.stringify(payload, null, 2));
 	console.log("Message...");
 	// console.log(JSON.stringify(message, null, 2));
-	// try updating message with api
-	updateMessage(message.ts, message);
+	
+	if(siteData){
+		// try updating message with api
+		updateMessage(message.ts, message, siteData.appAuthToken);
+	
+	}else{
+		console.log('Getting Site Data...');
+		db.getData( site.site_db, function(objectMap){
+			console.log('Performing Site Data Callback...');
+			initSiteData(objectMap);
+			
+			// try updating message with api
+			updateMessage(message.ts, message, siteData.appAuthToken);
+		});
+	}
 }
 
 
