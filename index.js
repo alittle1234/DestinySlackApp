@@ -59,6 +59,7 @@ app.get('/users/', function(req, res) {
 	console.log('Done Asking for users...');
 });
 
+
 /* 
 * 	handle get: get the site data
 */
@@ -75,26 +76,55 @@ app.get('/site/', function(req, res) {
 });
 
 
-// Set the configuration settings
-/* const credentials = {
-  client: {
-    id: site.clientId,
-    secret: site.clientSecret
-  },
-  auth: {
-    tokenHost: site.tokenHost
-  }
-}; */
+
+
+
+const simple_oauth = require('simple-oauth2');
+var oauth;
+function initOauth2(){
+	// Set the configuration settings
+	credentials = {
+		client: {
+			id: siteData.clientId,
+			secret: siteData.clientSecret
+		},
+		auth: {
+			tokenHost: siteData.tokenHost
+		}
+	}
+	oauth = simple_oauth.create(credentials);
+}
+
+var siteData;
+function initSiteData(objectMap){
+	siteData = objectMap[1];
+}
+
 
 // Initialize the OAuth2 Library
-/* const oauth2 = require('simple-oauth2').create(credentials); */
+function initOauth(done){
+	if(siteData){
+		// set variable data w sitedata
+		initOauth2();
+		done();
+	}else{
+		console.log('Getting Site Data...');
+		db.getData( site.site_db, function(objectMap){
+			console.log('Performing Site Data Callback...');
+			initSiteData(objectMap);
+			// set variable data w sitedata
+			initOauth2();
+			done();
+		});
+	}
+}
 
 app.get('/oauthAsk/', function(req, res) {
 	console.log('oauthAsk...');
 	
 	console.log('oauthAsk req...');
 	console.log(req.originalUrl);
-	var q = req.originalUrl.substring("/oauthAsk/".length);
+	var qs = req.originalUrl.substring("/oauthAsk/".length);
 	
 	// user has oauth token?
 		// yes... do oauth required task
@@ -103,25 +133,49 @@ app.get('/oauthAsk/', function(req, res) {
 				// get auth permision from server
 					//....
 						// do oauth required task
-	var params = querystring.parse(q);
+	var params = querystring.parse(qs);
+	
 	var userId = parseInt(params.userId);
-	var authToken = users.getAuthToken(userId);
 	var authAction = params.action; // needs more context for action...
-	if(authToken){
-		// do action
-		authAction(authAction, userId, authToken);
-	}else{
-		// do auth flow
-		authFlow(userId, function(authAction, userId, authToken){
-			console.log('auth flow final callback...');
-			authAction(authAction, userId, authToken);
-		});
-	}
+	var actionData = params; // the rest of the params?
+	
+	users.getUser(userId, null, function(user){
+		var authToken = user.authToken;
+	
+		if(oauth){
+			authActionStart(authAction, user, authToken, actionData);
+		}else{
+			initOauth(function(){
+				authActionStart(authAction, userId, authToken, actionData);
+			});
+		}
+	} );
 	
 	console.log('oauthAsk Done...');
 });
 
+function authActionStart(authAction, user, authToken, actionData){
+	if(authToken){
+		// do action
+		doAuthAction(authAction, user, authToken);
+	}else{
+		// do auth flow
+		authFlow(user, function(authAction, user, authToken){
+			console.log('auth flow final callback...');
+			doAuthAction(authAction, user, authToken);
+		});
+	}
+}
 
+// do an action that requires valid auth token, when auth token is populated
+function doAuthAction(authAction, user, authToken, actionData){
+	
+}
+
+// begin request an auth token
+function authFlow(user, callback){
+	// send redirect?  need req/res object?
+}
 
 
 /* 
