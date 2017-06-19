@@ -68,6 +68,7 @@ app.get('/site/', function(req, res) {
 	db.getData( site.site_db, function(objectMap){
 		console.log('Performing Site Data Callback...');
 		console.log(JSON.stringify(objectMap, null, 2));
+		res.status(200).end();
 	});
 	
 	console.log('Done Getting Site data....');

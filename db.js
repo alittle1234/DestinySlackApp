@@ -129,6 +129,7 @@ module.exports.getData = function(dbObject, resultMethod) {
 							console.log('Row Id: ' + row.id);
 							console.log(JSON.stringify(row));
 							
+							var obj = {};
 							for(var i = 0; i < dbObject.cols.length; i++){
 								obj[dbObject.cols[i].varName] = row[dbObject.cols[i].colName];
 							}
