@@ -100,6 +100,12 @@ function initSiteData(objectMap){
 	siteData = objectMap[1];
 }
 
+// initialize site data on startup
+db.getData( site.site_db, function(objectMap){
+	console.log('Performing Site Data Callback...');
+	initSiteData(objectMap);
+});
+
 
 // Initialize the OAuth2 Library
 function initOauth(done){
@@ -268,7 +274,6 @@ app.post('/d/actions', urlencodedParser, function(req, res) {
 
 var icon_url = ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
 var app_name = "Destiny App";
-var general_webhook = site.generalWebhook;
 
 var menu_color 		= "#3AA3E3";
 var invite_color 	= "#31110A";
@@ -485,7 +490,7 @@ function sendImOn(payload, user){
 			getJoinAttachment(username, true, user)
 		]
 	}
-	sendMessageToSlackResponseURL(general_webhook, message);
+	sendMessageToSlackResponseURL(siteData.generalWebhook, message);
 }
 
 /* send a "getting on at..." message
@@ -522,7 +527,7 @@ function sendGettingOn(payload, user){
 	
 			
 			
-	sendMessageToSlackResponseURL(general_webhook, message);
+	sendMessageToSlackResponseURL(siteData.generalWebhook, message);
 }
 
 /* send a "anyone getting on?" message
@@ -546,7 +551,7 @@ function sendAskGetOn(payload, user){
 			getJoinAttachment(username, false, user)
 		]
 	}
-	sendMessageToSlackResponseURL(general_webhook, message);
+	sendMessageToSlackResponseURL(siteData.generalWebhook, message);
 }
 
 /* 	the join question attachment for orginal message posts
