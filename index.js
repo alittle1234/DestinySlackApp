@@ -75,7 +75,7 @@ app.get('/site/', function(req, res) {
 
 
 // Set the configuration settings
-const credentials = {
+/* const credentials = {
   client: {
     id: site.clientId,
     secret: site.clientSecret
@@ -83,10 +83,10 @@ const credentials = {
   auth: {
     tokenHost: site.tokenHost
   }
-};
+}; */
 
 // Initialize the OAuth2 Library
-const oauth2 = require('simple-oauth2').create(credentials);
+/* const oauth2 = require('simple-oauth2').create(credentials); */
 
 app.get('/oauthAsk/', function(req, res) {
 	console.log('oauthAsk...');
