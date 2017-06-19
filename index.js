@@ -1079,7 +1079,7 @@ function updateMessage(timestamp, message, token){
 		as_user:	'false'
     });
 	
-	sendDataToSlackApi('chat.update/', data);
+	sendDataToSlackApi('chat.update', data);
 }
 
 
@@ -1101,11 +1101,11 @@ function sendDataToSlackApi(methodApi, data){
             console.error(error);
         }
 		console.log("sendDataToSlackApi Response...");
-		console.log(response);
+		//console.log(response);
 		
-		/* response.on('data', function (chunk) {
+		response.on('data', function (chunk) {
 			console.log("body: " + chunk);
-		}); */
+		});
     })
 }
 
