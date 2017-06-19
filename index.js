@@ -1073,7 +1073,7 @@ function updateMessage(timestamp, message, token){
 	var data = querystring.stringify({
 		token: 		token,
 		ts: 		timestamp,
-		channel:	message.channel,
+		channel:	message.channel.id,
 		text:		message.text,
 		attachments:message.attachments,
 		as_user:	'false'
