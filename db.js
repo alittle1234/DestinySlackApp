@@ -1,4 +1,4 @@
-var pg = require('pg');
+const pg = require('pg');
 pg.defaults.ssl = true;
 
 
@@ -97,15 +97,51 @@ module.exports.storeUsers = function(users) {
 								}
 						   );
 					}
-				
 				}
 			}
-			
 			return;
 		});
-		
+	});
+};
+
+
+
+module.exports.getData = function(dbObject, resultMethod) {
+	console.log('getData...');
 	
+	var objectMap = {}; // populate this map
+	
+	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+		console.log('Connecting...');
 		
+		// Handle connection errors
+		if(err) {
+			done();
+			console.log(err);
+			return res.status(500).json({success: false, data: err});
+		}
+		
+		// SQL Query > Select Data
+		console.log('Run Query...');
+		const query = client
+						.query('SELECT * FROM '+dbObject.tableName+';')
+						.on('row', function(row) {
+							console.log('Row Id: ' + row.id);
+							console.log(JSON.stringify(row));
+							
+							for(var i = 0; i < dbObject.cols.length; i++){
+								obj[dbObject.cols[i].varName] = row[dbObject.cols[i].colName];
+							}
+							
+							objectMap[row.id] = obj;
+						});
+						
+		query.on('end', function() {
+			done();
+			
+			console.log('getData Done: ' + dbObject.tableName + ': ' + JSON.stringify(objectMap));
+			if(resultMethod) resultMethod(objectMap);
+		});
 	});
 };
 
