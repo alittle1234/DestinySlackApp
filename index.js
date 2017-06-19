@@ -692,20 +692,12 @@ function handleJoin(payload){
 	console.log("Message...");
 	// console.log(JSON.stringify(message, null, 2));
 	
-	if(siteData){
-		// try updating message with api
-		updateMessage(message.ts, message, siteData.appAuthToken);
 	
-	}else{
-		console.log('Getting Site Data...');
-		db.getData( site.site_db, function(objectMap){
-			console.log('Performing Site Data Callback...');
-			initSiteData(objectMap);
-			
-			// try updating message with api
-			updateMessage(message.ts, message, siteData.appAuthToken);
-		});
-	}
+	// try updating message with api
+	message.channel = payload.channel.id;
+	updateMessage(message.ts, message, siteData.appAuthToken);
+	
+	
 }
 
 
@@ -1073,7 +1065,7 @@ function updateMessage(timestamp, message, token){
 	var data = querystring.stringify({
 		token: 		token,
 		ts: 		timestamp,
-		channel:	message.channel.id,
+		channel:	message.channel,
 		text:		message.text,
 		attachments:message.attachments,
 		as_user:	'false'
