@@ -460,7 +460,7 @@ function handleDestinyReq(req, res){
 					else if(action.imon == params[0]){
 						// send "I'm On" message
 						users.getUser(reqBody.user_id, null, function(user){
-							sendImOn(null, user);
+							sendImOn(reqBody, user);
 						} );
 					}
 				}
@@ -494,7 +494,7 @@ function sendImOn(payload, user){
 	
 	
 	// clear private message
-	if(payload) clearPrivate(payload.response_url);
+	if(payload && payload.channel) clearPrivate(payload.response_url);
 	
 	var username = getNameRef(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
@@ -511,7 +511,12 @@ function sendImOn(payload, user){
 	// sendMessageToSlackResponseURL(siteData.generalWebhook, message);
 	
 	// try posting message with api
-	message.channel = payload.channel.id;
+	if(payload.channel_id){
+		message.channel = payload.channel_id;
+	}		
+	else{
+		message.channel = payload.channel.id;
+	}
 	postMessage(message, siteData.appAuthToken);
 	
 }
