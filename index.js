@@ -166,21 +166,39 @@ function authActionStart(authAction, user, authToken, actionData){
 		doAuthAction(authAction, user, authToken);
 	}else{
 		// do auth flow
-		authFlow(user, function(authAction, user, authToken){
-			console.log('auth flow final callback...');
-			doAuthAction(authAction, user, authToken);
-		});
+		authFlow(user, actionData);
 	}
 }
 
 // do an action that requires valid auth token, when auth token is populated
 function doAuthAction(authAction, user, authToken, actionData){
-	
+	// callback on failure of "token invalid" should start the auth flow
 }
 
-// begin request an auth token
-function authFlow(user, callback){
-	// send redirect?  need req/res object?
+const slackAuthRedirect 	= "https://slack.com/oauth/authorize";
+const slackTokenExchange 	= "https://slack.com/api/oauth.access";
+const siteAuthLanding 		= "/oauthProvLanding";
+// begin request of an auth token
+function authFlow(user, actionData){
+	// send redirect user to slack oauth url
+	// user provides permsions
+	// slack redirects user to our provided redirect url
+	// we use provided code to exchange for auth token
+	var ourRedirect = site.url + siteAuthLanding + "?" + querystring.stringify(actionData);
+	
+	/* {
+		token: 		token,
+		ts: 		timestamp,
+		channel:	message.channel,
+		text:		message.text,
+		attachments:message.attachments,
+		as_user:	'false'
+    }); */
+}
+
+app.get('/oauthProvLanding/', function(req, res) {
+	// user redirected here by slack
+	// request should have code and verified by prev 'state'
 }
 
 
@@ -490,7 +508,12 @@ function sendImOn(payload, user){
 			getJoinAttachment(username, true, user)
 		]
 	}
-	sendMessageToSlackResponseURL(siteData.generalWebhook, message);
+	// sendMessageToSlackResponseURL(siteData.generalWebhook, message);
+	
+	// try posting message with api
+	message.channel = payload.channel.id;
+	postMessage(message, siteData.appAuthToken);
+	
 }
 
 /* send a "getting on at..." message
@@ -1072,6 +1095,19 @@ function updateMessage(timestamp, message, token){
     });
 	
 	sendDataToSlackApi('chat.update', data);
+}
+
+function postMessage( message, token){
+	
+	var data = querystring.stringify({
+		token: 		token,
+		channel:	message.channel,
+		text:		message.text,
+		icon_url:	message.icon_url,
+		attachments:message.attachments
+    });
+	
+	sendDataToSlackApi('chat.postMessage', data);
 }
 
 

@@ -24,6 +24,9 @@ module.exports.site_db = {
 		},{
 			varName: 'tokenHost',
 			colName: 'token_host'
+		},{
+			varName: 'url',
+			colName: 'site_url'
 		}
 	]
 };
