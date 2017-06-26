@@ -517,6 +517,8 @@ function sendImOn(payload, user){
 	else{
 		message.channel = payload.channel.id;
 	}
+	// stringify attachments array
+	message.attachments = JSON.stringify(message.attachments);
 	postMessage(message, siteData.appAuthToken);
 	
 }
