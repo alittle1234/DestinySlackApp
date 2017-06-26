@@ -725,6 +725,8 @@ function handleJoin(payload){
 	
 	// try updating message with api
 	message.channel = payload.channel.id;
+	// stringify message attachments
+	message.attachments = JSON.stringify(message.attachments);
 	updateMessage(message.ts, message, siteData.appAuthToken);
 	
 	
