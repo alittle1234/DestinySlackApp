@@ -199,7 +199,7 @@ function authFlow(user, actionData){
 app.get('/oauthProvLanding/', function(req, res) {
 	// user redirected here by slack
 	// request should have code and verified by prev 'state'
-}
+});
 
 
 /* 
