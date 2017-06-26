@@ -1128,6 +1128,9 @@ function sendDataToSlackApi(methodApi, data){
 		body: data
 		
 	};
+	
+	console.log("sending data...");
+	console.log(data);
     
     request(options, (error, response, body) => {
         if (error){
