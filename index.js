@@ -12,6 +12,12 @@ const site 		= require('./site');
 const bungie 	= require('./bungie');
 const db 		= require('./db');
 
+const Message 		= require('./message').Message;
+const MessageData	= require('./message').MessageData;
+
+const tempMs = new Message("1234", "", Date.now(), Date.now(), "uid1234", new MessageData({hasJoin:true}, null, Date.now(), "Eastern"), null);
+console.log(tempMs);
+
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
@@ -323,6 +329,9 @@ var action = {
 	setimage : 			"image",
 	
 	refreshDestiny :    "bid",
+	
+	addJoin: 			"addJoin",
+	removeJoin: 		"removeJoin",
 };
 
 
@@ -405,6 +414,12 @@ function handleDestinyReq(req, res){
 				else if(action.join == actionName){
 					handleJoin(payload);
 				}
+				else if(action.addJoin == actionName){
+					handleAddJoin(payload);
+				}
+				else if(action.removeJoin == actionName){
+					handleRemoveJoin(payload);
+				}
 				
 				else{
 					var message = {
@@ -482,6 +497,7 @@ function getNameRef(user){
 	return users.getPlayerName(user);
 }
 
+var messageCache = {};
 /* sends a "Player is on!" message
 *
 *	PetterNincompoop is on Destiny!
@@ -522,6 +538,13 @@ function sendImOn(payload, user){
 	postMessage(message, siteData.appAuthToken, function(messageId){
 		// send update message
 		sendMessageUpdateMenu(payload.response_url, messageId);
+		
+		// store message
+		//MessageData(join, activity, time, timeZone)
+		var join = {hasJoin: true};
+		var xtraData = new MessageData(join, null, Date.now(), "Eastern");
+		// new Message(timestamp, responseUrl, dateAdded, dateModified, userId, extraData, orginalMessage)
+		messageCache[messageId] = new Message(messageId, "", Date.now(), Date.now(), user.userId, xtraData, message);
 	});
 	
 }
@@ -672,6 +695,22 @@ function getPollAttachment(fieldArray){
 			}
 }
 
+function handleAddJoin(payload){
+	var ts = payload.actions[0].value;
+	var messageClass = messageCache[ts];
+
+}
+
+
+function handleRemoveJoin(payload){
+
+}
+
+// restore message
+// build field array from properties
+// add users based on message set
+// update local and send new message
+
 /* 	
 *	handles join action for all join attachments
 * 	join poll becomes second attachment to all messages
@@ -683,27 +722,6 @@ function handleJoin(payload){
 	// get message as original message
 	var message = payload.original_message;
 	
-	var username = getNameRef(payload.user);
-	var choice = payload.actions[0].value;
-	// "fields":
-	var fieldsArray =  [
-                {
-                    "title": "Yes",
-                    "value": "",
-                    "short": false
-                },
-				{
-                    "title": "Maybe",
-                    "value": "",
-                    "short": false
-                },
-				{
-                    "title": "No",
-                    "value": "",
-                    "short": false
-                }
-            ];
-			
 	// find attachement with poll data
 	var pollIndex = 1;
 	if(message.attachments){
@@ -715,6 +733,10 @@ function handleJoin(payload){
 		}
 	}
 	
+	
+	var fieldsArray =  [];
+	
+	var username = getNameRef(payload.user);
 	var hasValues = [];
 	// remove user from field if exist
 	if(message.attachments[pollIndex] && message.attachments[pollIndex].fields){
@@ -739,8 +761,30 @@ function handleJoin(payload){
 				}
 			}
 		}
+	}else{
+		
+		// create default feilds for join
+		fieldsArray =  [
+					{
+						"title": "Yes",
+						"value": "",
+						"short": false
+					},
+					{
+						"title": "Maybe",
+						"value": "",
+						"short": false
+					},
+					{
+						"title": "No",
+						"value": "",
+						"short": false
+					}
+				];
+			
 	}
 	
+	var choice = payload.actions[0].value;
 	// add user to chosen field
 	var fieldNum = 0;
 	if(choice == "maybe"){

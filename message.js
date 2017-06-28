@@ -9,15 +9,23 @@ var message = {
 }
 
 class Message{
-	constructor(timestamp, responseUrl, dateAdded, dateModified, userId, data){
+	constructor(timestamp, responseUrl, dateAdded, dateModified, userId, msgDataObj, orginalMessage){
 		this.timestamp = timestamp;
 		this.responseUrl = responseUrl;
 		this.dateAdded = dateAdded;
 		this.dateModified = dateModified;
 		this.userId = userId;
-		this.data = data;
 		
-		this.messageData = Message.deserializeData(this.data);
+		this.messageData = msgDataObj;
+		this.orginalMessage = orginalMessage;
+		
+		/* 
+		if(extraData)
+			this.messageData = Message.deserializeData(extraData);
+		
+		if(orginalMessage)
+			this.orginalMessage = JSON.parse(orginalMessage); // needs to be stringified when storing
+		 */// TODO this may be automaticaly deserialized if stored as string... using class may interupt that
 	}
 	static deserializeData(dataStr){
 		var j = JSON.parse(dataStr);
@@ -33,6 +41,7 @@ class Message{
 		return JSON.stringify(j);
 	}
 }
+
 var origMesCache = {
 	
 }
@@ -50,7 +59,7 @@ var messageData={
 		maybes: ["Uid1"],
 		yesLimit: 6,
 	},
-	activity: ["Trials", "Raid"...],
+	activity: ["Trials", "Raid"],
 	date: 12345,
 	localTz: "Central",
 	
@@ -72,3 +81,6 @@ class MessageData{
 // refresh cache
 
 // remove stale from cache
+
+module.exports.Message = Message;
+module.exports.MessageData = MessageData;
