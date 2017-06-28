@@ -519,8 +519,49 @@ function sendImOn(payload, user){
 	}
 	// stringify attachments array
 	message.attachments = JSON.stringify(message.attachments);
-	postMessage(message, siteData.appAuthToken);
+	postMessage(message, siteData.appAuthToken, function(messageId){
+		// send update message
+		sendMessageUpdateMenu(payload.response_url, messageId);
+	});
 	
+}
+
+function sendMessageUpdateMenu(responseURL, messageId){
+	var message = {
+		"attachments": [
+			{
+				"text": "Update Message:",
+				"fallback": "Update Message Menu",
+				"callback_id": "",
+				"color": menu_color,
+				"attachment_type": "default",
+				"replace_original": false,
+				"actions": [
+					{
+						"name": action.addJoin,
+						"value": messageId,
+						"text": "Add Join",
+						"type": "button"
+					},
+					{
+						"name": action.removeJoin,
+						"value": messageId,
+						"text": "Remove Join",
+						"type": "button"
+					},
+					/* {
+						"name": action.askgeton,
+						"value": action.askgeton,
+						"text": "Getting On?",
+						"type": "button"
+					} */
+					// TODO menu type, "others"
+					// a menu drop-down of stats, status, etc
+				]
+			}
+		]
+	}
+	sendMessageToSlackResponseURL(responseURL, message);
 }
 
 /* send a "getting on at..." message
@@ -1106,7 +1147,7 @@ function updateMessage(timestamp, message, token){
 	sendDataToSlackApi('chat.update', data);
 }
 
-function postMessage( message, token){
+function postMessage( message, token, postResponse){
 	
 	var data = querystring.stringify({
 		token: 		token,
@@ -1116,12 +1157,19 @@ function postMessage( message, token){
 		attachments:message.attachments
     });
 	
-	sendDataToSlackApi('chat.postMessage', data);
+	sendDataToSlackApi('chat.postMessage', data, function(chunck){
+		if(postResponse){
+			// json
+			var j = JSON.parse(chunck);
+			// get ts
+			postResponse(j.ts);
+		}
+	});
 }
 
 
 // TODO probalby needs error and response functions as params?
-function sendDataToSlackApi(methodApi, data){
+function sendDataToSlackApi(methodApi, data, responseCallback){
 	var options = {
 		uri: 'https://slack.com/api/' + methodApi,
 		method: 'POST',
@@ -1147,6 +1195,7 @@ function sendDataToSlackApi(methodApi, data){
 		
 		response.on('data', function (chunk) {
 			console.log("body: " + chunk);
+			if(responseCallback) responseCallback(chunk);
 		});
     })
 }
