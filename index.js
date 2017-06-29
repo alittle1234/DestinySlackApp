@@ -521,7 +521,7 @@ function sendImOn(payload, user){
 	
 	
 	// clear private message
-	if(payload && payload.channel) clearPrivate(payload.response_url);
+	//if(payload && payload.channel) clearPrivate(payload.response_url);
 	
 	var username = getNameRef(user);
 	var title = "_*" + username + "*" + " is on Destiny!_";
@@ -557,6 +557,8 @@ function sendImOn(payload, user){
 		var xtraData = new MessageData(join, null, Date.now(), "Eastern");
 		// new Message(timestamp, responseUrl, dateAdded, dateModified, userId, extraData, orginalMessage)
 		messageCache[messageId] = new Message(messageId, "", Date.now(), Date.now(), user.userId, xtraData, message);
+		
+		console.log(messageCache[messageId]);
 	});
 	
 }
@@ -732,6 +734,8 @@ function handleAddJoin(payload){
 
 function handleRemoveJoin(payload){
 	var ts = payload.actions[0].value;
+	console.log(messageCache[ts]);
+	
 	var messageClass = messageCache[ts];
 	var message = messageClass.orginalMessage;
 
