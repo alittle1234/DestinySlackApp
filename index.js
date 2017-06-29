@@ -710,7 +710,11 @@ function getPollAttachment(fieldArray){
 }
 
 function handleAddJoin(payload){
+	console.log("handleAddJoin...");
+	
 	var ts = payload.actions[0].value;
+	console.log(messageCache[ts]);
+	
 	var messageClass = messageCache[ts];
 	var message = messageClass.orginalMessage;
 
@@ -728,11 +732,13 @@ function handleAddJoin(payload){
 	message.channel = payload.channel.id;
 	// stringify message attachments
 	message.attachments = JSON.stringify(message.attachments);
-	updateMessage(message.ts, message, siteData.appAuthToken);
+	updateMessage(ts, message, siteData.appAuthToken);
 }
 
 
 function handleRemoveJoin(payload){
+	console.log("handleRemoveJoin...");
+	
 	var ts = payload.actions[0].value;
 	console.log(messageCache[ts]);
 	
@@ -753,7 +759,7 @@ function handleRemoveJoin(payload){
 	message.channel = payload.channel.id;
 	// stringify message attachments
 	message.attachments = JSON.stringify(message.attachments);
-	updateMessage(message.ts, message, siteData.appAuthToken);
+	updateMessage(ts, message, siteData.appAuthToken);
 }
 
 function getJoinFields(){
