@@ -372,7 +372,7 @@ function handleDestinyReq(req, res){
 				console.log('payload: ' + JSON.stringify(payload, null, 2) );
 				
 				// get user
-				users.getUser(payload.user.user_id, null, function(user){
+				users.getUser(payload.user.id, null, function(user){
 					payload.user = user;
 					// perform action
 					handleDestinyButtonAction(payload);
