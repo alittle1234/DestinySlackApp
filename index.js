@@ -1243,7 +1243,7 @@ function updateMessage(timestamp, message, token){
 		ts: 		timestamp,
 		channel:	message.channel,
 		text:		message.text,
-		attachString:message.attachments,
+		attachments:message.attachString,
 		as_user:	'false'
     });
 	
@@ -1256,7 +1256,7 @@ function postMessage( message, token, postResponse){
 		channel:	message.channel,
 		text:		message.text,
 		icon_url:	message.icon_url,
-		attachString:message.attachments
+		attachments:message.attachString
     });
 	
 	sendDataToSlackApi('chat.postMessage', data, function(body){
