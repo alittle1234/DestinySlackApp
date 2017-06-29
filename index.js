@@ -569,7 +569,7 @@ function sendMessageUpdateMenu(responseURL, messageId){
 			{
 				"text": "Update Message:",
 				"fallback": "Update Message Menu",
-				"callback_id": "",
+				"callback_id": "update_menu"+messageId,
 				"color": menu_color,
 				"attachment_type": "default",
 				"replace_original": false,
