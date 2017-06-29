@@ -54,3 +54,46 @@ module.exports.processDestinyPage = function (bungieId, htmlBody, callback){
 		console.log("HTML was null");
 	}
 }
+
+
+/* 
+* 	handle bungie id from url
+app.get('/bid/', function(req, res) {
+	console.log('bid...');
+	
+	console.log('bid req...');
+	console.log(req.originalUrl);
+	var q = req.originalUrl.substring(5);
+	
+	refreshDestinyData(parseInt(querystring.parse(q).bid), function(data){
+		console.log('bid callback...');
+		console.log(JSON.stringify(data, null, 2));
+		
+		console.log(data.bid);
+		console.log(data.img);
+		console.log(data.name);
+		
+		res.status(200).end();
+	});
+	console.log('bid Done...');
+});
+
+*/
+
+
+
+/* 
+* 	refresh bungie id data( name, image ) by sending get request and 
+*	 parsing response
+*/
+function refreshDestinyData (bungieId, callback){
+	console.log('refreshDestinyData(bungieId)...');
+	
+	var url = "https://www.bungie.net/en/Profile/254/" + bungieId;
+	
+	// do get on bungie profile page
+	doGetData(url,
+		function(response){
+			bungie.processDestinyPage(bungieId, response, callback);
+		});
+}
