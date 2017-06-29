@@ -15,8 +15,11 @@ const db 		= require('./db');
 const Message 		= require('./message').Message;
 const MessageData	= require('./message').MessageData;
 
+/*  cache for messages sent to slack */
+var messageCache = {};
 const tempMs = new Message("1234", "", Date.now(), Date.now(), "uid1234", new MessageData({hasJoin:true}, null, Date.now(), "Eastern"), null);
-console.log(tempMs);
+messageCache[tempMs.timestamp] = tempMs;
+console.log(messageCache[tempMs.timestamp].messageData.join);
 
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
@@ -368,67 +371,12 @@ function handleDestinyReq(req, res){
 				
 				console.log('payload: ' + JSON.stringify(payload, null, 2) );
 				
-				var actionName = payload.actions[0].name;
-				
-				// SEND MESSAGE -- IM ON
-				if(action.imon == actionName){
-					sendImOn(payload, payload.user);
-				}
-				
-				
-				// MENU -- ON AT...
-				else if(action.gettingon_menu == actionName){
-					sendImOnAt_Menu(payload.response_url, payload);
-				}
-				
-				// MENU
-				else if(action.gettingon_start == actionName){
-					sendImOnAt_Start(payload.response_url, payload);
-				}
-				// MENU
-				else if(action.gettingon_hour == actionName){
-					sendImOnAt_AmPm(payload.response_url, payload);
-				}
-				// MENU
-				else if(action.gettingon_amp == actionName){
-					sendImOnAt_Day(payload.response_url, payload);
-				}
-				// SEND MESSAGE -- ON AT...
-				else if(action.gettingon_day == actionName){
-					sendGettingOn(payload, payload.user);
-				}
-				
-				// SEND MESSAGE -- ON AT...
-				else if(action.askgeton == actionName){
-					sendGettingOn(payload, payload.user);
-				}
-				
-				
-				// TODO not fully implemented
-				/* else if(action.askgeton == actionName){
-					sendAskGetOn(payload, payload.user);
-				} */
-				
-				
-				// JOIN ACTION
-				else if(action.join == actionName){
-					handleJoin(payload);
-				}
-				else if(action.addJoin == actionName){
-					handleAddJoin(payload);
-				}
-				else if(action.removeJoin == actionName){
-					handleRemoveJoin(payload);
-				}
-				
-				else{
-					var message = {
-						"text": payload.user.name+" clicked: "+payload.actions[0].name +"\n"
-						 + JSON.stringify(payload, null, 2),
-						"replace_original": false
-					}
-					sendMessageToSlackResponseURL(payload.response_url, message);
-				}
+				// get user
+				users.getUser(payload.user.user_id, null, function(user){
+					payload.user = user;
+					// perform action
+					handleDestinyButtonAction(payload);
+				} );
 			}else{
 				// SLASH COMMANDS
 				console.log('ReqBody: ' + JSON.stringify(reqBody, null, 2) );
@@ -488,6 +436,70 @@ function handleDestinyReq(req, res){
 	}
 }
 
+function handleDestinyButtonAction(payload){
+	var actionName = payload.actions[0].name;
+				
+	// SEND MESSAGE -- IM ON
+	if(action.imon == actionName){
+		sendImOn(payload, payload.user);
+	}
+	
+	
+	// MENU -- ON AT...
+	else if(action.gettingon_menu == actionName){
+		sendImOnAt_Menu(payload.response_url, payload);
+	}
+	
+	// MENU
+	else if(action.gettingon_start == actionName){
+		sendImOnAt_Start(payload.response_url, payload);
+	}
+	// MENU
+	else if(action.gettingon_hour == actionName){
+		sendImOnAt_AmPm(payload.response_url, payload);
+	}
+	// MENU
+	else if(action.gettingon_amp == actionName){
+		sendImOnAt_Day(payload.response_url, payload);
+	}
+	// SEND MESSAGE -- ON AT...
+	else if(action.gettingon_day == actionName){
+		sendGettingOn(payload, payload.user);
+	}
+	
+	// SEND MESSAGE -- ON AT...
+	else if(action.askgeton == actionName){
+		sendGettingOn(payload, payload.user);
+	}
+	
+	
+	// TODO not fully implemented
+	/* else if(action.askgeton == actionName){
+		sendAskGetOn(payload, payload.user);
+	} */
+	
+	
+	// JOIN ACTION
+	else if(action.join == actionName){
+		handleJoin(payload);
+	}
+	else if(action.addJoin == actionName){
+		handleAddJoin(payload);
+	}
+	else if(action.removeJoin == actionName){
+		handleRemoveJoin(payload);
+	}
+	
+	else{
+		var message = {
+			"text": payload.user.name+" clicked: "+payload.actions[0].name +"\n"
+			 + JSON.stringify(payload, null, 2),
+			"replace_original": false
+		}
+		sendMessageToSlackResponseURL(payload.response_url, message);
+	}
+}
+
 /*
 *	return the slack format name reference with player name
 *
@@ -497,7 +509,6 @@ function getNameRef(user){
 	return users.getPlayerName(user);
 }
 
-var messageCache = {};
 /* sends a "Player is on!" message
 *
 *	PetterNincompoop is on Destiny!
@@ -698,12 +709,66 @@ function getPollAttachment(fieldArray){
 function handleAddJoin(payload){
 	var ts = payload.actions[0].value;
 	var messageClass = messageCache[ts];
+	var message = messageClass.orginalMessage;
 
+	messageClass.messageData.join.hasJoin = true;
+	messageClass.dateModified = Date.now();
+	
+	var joinPollIndex = 0; // TODO search for join poll
+	
+	// set second attachment as fields
+	message.attachments[joinPollIndex] = getJoinAttachment(getNameRef(payload.user), true, payload.user);
+	// replace original
+	message.replace_original = true;
+	
+	// try updating message with api
+	message.channel = payload.channel.id;
+	// stringify message attachments
+	message.attachments = JSON.stringify(message.attachments);
+	updateMessage(message.ts, message, siteData.appAuthToken);
 }
 
 
 function handleRemoveJoin(payload){
+	var ts = payload.actions[0].value;
+	var messageClass = messageCache[ts];
+	var message = messageClass.orginalMessage;
 
+	messageClass.messageData.join.hasJoin = false;
+	messageClass.dateModified = Date.now();
+	
+	var joinPollIndex = 0;
+	
+	// set second attachment as fields
+	message.attachments[joinPollIndex] = null;
+	// replace original
+	message.replace_original = true;
+	
+	// try updating message with api
+	message.channel = payload.channel.id;
+	// stringify message attachments
+	message.attachments = JSON.stringify(message.attachments);
+	updateMessage(message.ts, message, siteData.appAuthToken);
+}
+
+function getJoinFields(){
+	return [
+					{
+						"title": "Yes",
+						"value": "",
+						"short": false
+					},
+					{
+						"title": "Maybe",
+						"value": "",
+						"short": false
+					},
+					{
+						"title": "No",
+						"value": "",
+						"short": false
+					}
+				];
 }
 
 // restore message
@@ -723,7 +788,7 @@ function handleJoin(payload){
 	var message = payload.original_message;
 	
 	// find attachement with poll data
-	var pollIndex = 1;
+	var pollIndex = 1; // TODO join poll attachment assumed to be '0'
 	if(message.attachments){
 		for(var i = 1; i < message.attachments.length; i++){
 			if(message.attachments[i].callback_id == join_poll_attach_id){
@@ -733,7 +798,7 @@ function handleJoin(payload){
 		}
 	}
 	
-	
+	// field array containing list of users who have clicked: yes, no, maybe, etc
 	var fieldsArray =  [];
 	
 	var username = getNameRef(payload.user);
@@ -764,23 +829,7 @@ function handleJoin(payload){
 	}else{
 		
 		// create default feilds for join
-		fieldsArray =  [
-					{
-						"title": "Yes",
-						"value": "",
-						"short": false
-					},
-					{
-						"title": "Maybe",
-						"value": "",
-						"short": false
-					},
-					{
-						"title": "No",
-						"value": "",
-						"short": false
-					}
-				];
+		fieldsArray =  getJoinFields();
 			
 	}
 	
