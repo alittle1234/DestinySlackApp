@@ -545,7 +545,7 @@ function sendImOn(payload, user){
 		message.channel = payload.channel.id;
 	}
 	// stringify attachments array
-	message.attachments = JSON.stringify(message.attachments);
+	message.attachString = JSON.stringify(message.attachments);
 	postMessage(message, siteData.appAuthToken, function(messageId){
 		console.log('in post callback. messageId:' + messageId);
 		// send update message
@@ -731,7 +731,7 @@ function handleAddJoin(payload){
 	// try updating message with api
 	message.channel = payload.channel.id;
 	// stringify message attachments
-	message.attachments = JSON.stringify(message.attachments);
+	message.attachString = JSON.stringify(message.attachments);
 	updateMessage(ts, message, siteData.appAuthToken);
 }
 
@@ -758,7 +758,7 @@ function handleRemoveJoin(payload){
 	// try updating message with api
 	message.channel = payload.channel.id;
 	// stringify message attachments
-	message.attachments = JSON.stringify(message.attachments);
+	message.attachString = JSON.stringify(message.attachments);
 	updateMessage(ts, message, siteData.appAuthToken);
 }
 
@@ -871,7 +871,7 @@ function handleJoin(payload){
 	// try updating message with api
 	message.channel = payload.channel.id;
 	// stringify message attachments
-	message.attachments = JSON.stringify(message.attachments);
+	message.attachString = JSON.stringify(message.attachments);
 	updateMessage(message.ts, message, siteData.appAuthToken);
 	
 	
@@ -1243,7 +1243,7 @@ function updateMessage(timestamp, message, token){
 		ts: 		timestamp,
 		channel:	message.channel,
 		text:		message.text,
-		attachments:message.attachments,
+		attachString:message.attachments,
 		as_user:	'false'
     });
 	
@@ -1256,7 +1256,7 @@ function postMessage( message, token, postResponse){
 		channel:	message.channel,
 		text:		message.text,
 		icon_url:	message.icon_url,
-		attachments:message.attachments
+		attachString:message.attachments
     });
 	
 	sendDataToSlackApi('chat.postMessage', data, function(body){
