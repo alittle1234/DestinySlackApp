@@ -547,6 +547,7 @@ function sendImOn(payload, user){
 	// stringify attachments array
 	message.attachments = JSON.stringify(message.attachments);
 	postMessage(message, siteData.appAuthToken, function(messageId){
+		console.log('in post callback. messageId:' + messageId);
 		// send update message
 		sendMessageUpdateMenu(payload.response_url, messageId);
 		
@@ -1227,7 +1228,6 @@ function updateMessage(timestamp, message, token){
 	// message.text
 	// message.attachments = [{"normalAttr":"somethingElse"}]
 	// message.as_user = false?
-	
 	var data = querystring.stringify({
 		token: 		token,
 		ts: 		timestamp,
@@ -1241,7 +1241,6 @@ function updateMessage(timestamp, message, token){
 }
 
 function postMessage( message, token, postResponse){
-	
 	var data = querystring.stringify({
 		token: 		token,
 		channel:	message.channel,
@@ -1250,10 +1249,10 @@ function postMessage( message, token, postResponse){
 		attachments:message.attachments
     });
 	
-	sendDataToSlackApi('chat.postMessage', data, function(chunck){
+	sendDataToSlackApi('chat.postMessage', data, function(body){
 		if(postResponse){
 			// json
-			var j = JSON.parse(chunck);
+			var j = JSON.parse(body);
 			// get ts
 			postResponse(j.ts);
 		}
@@ -1285,10 +1284,12 @@ function sendDataToSlackApi(methodApi, data, responseCallback){
 		//console.log(response);
 		console.log(response.body);
 
+		if(responseCallback) 
+			responseCallback(response.body);
 		
 		response.on('data', function (chunk) {
 			console.log("body: " + chunk);
-			if(responseCallback) responseCallback(chunk);
+			
 		});
     })
 }
