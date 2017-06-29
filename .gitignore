@@ -11,3 +11,4 @@ npm-debug.log
 Dockerfile
 docker-compose.yml
 db sql.txt
+package-lock.json
