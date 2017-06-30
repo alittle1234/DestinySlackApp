@@ -666,6 +666,7 @@ module.exports.handleDestinyReq = function (req, res){
 				if(removeValues){
 					debug('area:');
 					debug(removeArray[i]);
+					debug(removeValues);
 					var rIndex = removeValues.indexOf(user.id);
 					if(index > -1){
 						debug('removing:');
