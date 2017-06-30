@@ -659,9 +659,10 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		if(removeArray){
 			debug('removeArray');
+			debug(removeArray);
 			for(var i = 0; i < removeArray.length; i++){
 				// remove from area array
-				if(message.messageData.join[removeArray[i]){
+				if(message.messageData.join[removeArray[i]]){
 					debug('area:');
 					debug(removeArray[i]);
 					var removeValues = message.messageData.join[removeArray[i]];
