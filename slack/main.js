@@ -601,8 +601,10 @@ module.exports.handleDestinyReq = function (req, res){
 	function populateField(message, joinField, field){
 		if(message.messageData.join[joinField]){
 			var joinValues = message.messageData.join[joinField];
-			for(var i = 0; i < joinValues.size; i++){
-				field.value += (i > 0 ? fieldValSplit : "") + getNameRef(joinValues[i]);
+			for(var i = 0; i < joinValues.length; i++){
+				users.getUser(joinValues[i], null, function(user){
+					field.value += (i > 0 ? fieldValSplit : "") + getNameRef(user);
+				} );
 			}
 		}
 	}

@@ -36,7 +36,7 @@ module.exports.getUser = function (userId, userName, callback){
 		return;
 	}
 		
-	localGetUser(userId, userName, callback);
+	return localGetUser(userId, userName, callback);
 }
 
 function localGetUser(userId, userName, callback){
@@ -48,7 +48,8 @@ function localGetUser(userId, userName, callback){
 	}
 		
 	// else return user
-	callback( users_cache[userId] );
+	if(callback) callback( users_cache[userId] );
+	return users_cache[userId];
 }
 
 
