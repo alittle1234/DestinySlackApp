@@ -300,9 +300,14 @@ module.exports.handleDestinyReq = function (req, res){
 	}
 
 	function addMessage(messageId, message, payload, user){
-		//MessageData(join, activity, time, timeZone)
-		var join = {hasJoin: true};
-		var xtraData = new MessageData(join, null, Date.now(), "Eastern");
+		// MessageData(join, activity, time, timeZone)
+		var join = {
+			hasJoin: true,
+			
+			hasYes: true,
+			hasNo: true, 
+		};
+		var xtraData = new MessageData(join, [], Date.now(), "Eastern");
 		// new Message(timestamp, responseUrl, dateAdded, dateModified, userId, extraData, orginalMessage)
 		messageCache[messageId] = new Message(messageId, "", Date.now(), Date.now(), user.userId, xtraData, message);
 		
