@@ -1,29 +1,30 @@
-const pg = require('pg');
+const pg 		= require('pg');
+const logger 	= require('./logger');
 pg.defaults.ssl = true;
 
 
 module.exports.getUsers = function(setUsers) {
-	console.log('Get Users...');
+	logger.debug('Get Users...');
 	
 	var users = {}; // populate this map
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-		console.log('Connecting...');
+		logger.debug('Connecting...');
 		
 		// Handle connection errors
 		if(err) {
 			done();
-			console.log(err);
+			logger.debug(err);
 			return res.status(500).json({success: false, data: err});
 		}
 		
 		// SQL Query > Select Data
-		console.log('Run Query...');
+		logger.debug('Run Query...');
 		const query = client
 						.query('SELECT * FROM users;')
 						.on('row', function(row) {
-							console.log('Row Id: ' + row.id);
-							console.log(JSON.stringify(row));
+							logger.debug('Row Id: ' + row.id);
+							logger.debug(JSON.stringify(row));
 							var uId = row.id;
 							var u = {
 								"id" :			row.id,
@@ -38,8 +39,8 @@ module.exports.getUsers = function(setUsers) {
 		query.on('end', function() {
 			done();
 			
-			console.log('Done...');
-			console.log('Done Method: Users:' + JSON.stringify(users));
+			logger.debug('Done...');
+			logger.debug('Done Method: Users:' + JSON.stringify(users));
 			if(setUsers) setUsers(users);
 		});
 	});
@@ -47,13 +48,13 @@ module.exports.getUsers = function(setUsers) {
 
 // id, name, img_url, destiny_name
 module.exports.storeUsers = function(users) {
-	console.log('Storing Users...');
-	console.log(JSON.stringify(users, null, 2));
+	logger.debug('Storing Users...');
+	logger.debug(JSON.stringify(users, null, 2));
 	pg.connect(process.env.DATABASE_URL, (err, client, done) => {
 		// Handle connection errors
 		if(err) {
 			done();
-			console.log(err);
+			logger.debug(err);
 			return res.status(500).json({success: false, data: err});
 		}
 		// select all ids
@@ -65,34 +66,34 @@ module.exports.storeUsers = function(users) {
 					});
 		// add each user, checkin id to store or insert
 		query.on('end', () => {
-			console.log('Select All Done...');
+			logger.debug('Select All Done...');
 		
 			for(key in users){
-				if(key)	console.log('User: ' + JSON.stringify(key));
+				if(key)	logger.debug('User: ' + JSON.stringify(key));
 				if(key && users[key].id){
 					var user = users[key];
-					console.log('Storing... '  + user.id + ' ' + ids[user.id]);
+					logger.debug('Storing... '  + user.id + ' ' + ids[user.id]);
 						   
 					if(ids[user.id]){
-						console.log('Updating...');
+						logger.debug('Updating...');
 						client.query('UPDATE users SET name=($1), img_url=($2), destiny_name=($3), bungie_id=($4) WHERE id=($5::varchar);',
 							[user.name, user.img_url, user.destiny_name, user.bungie_id, user.id],
 							function (err, result) {
-								console.log('Update Full Complete...');
+								logger.debug('Update Full Complete...');
 								if (err) {
-								  return console.error('error during Full query: ', err)
+								  return logger.error('error during Full query: ', err)
 								}
 							}
 					   );
 					}else{
-						console.log('Inserting...');
+						logger.debug('Inserting...');
 						client.query('INSERT INTO users(id, name, img_url, destiny_name, bungie_id) ' +
 							'VALUES($1, $2, $3, $4, $5);',
 							[user.id, user.name, user.img_url, user.destiny_name, user.bungie_id],
 								function (err, result) {
-									console.log('Insert Complete...');
+									logger.debug('Insert Complete...');
 									if (err) {
-									  return console.error('error during query: ' + user.id, err)
+									  return logger.error('error during query: ' + user.id, err)
 									}
 								}
 						   );
@@ -107,27 +108,27 @@ module.exports.storeUsers = function(users) {
 
 
 module.exports.getData = function(dbObject, resultMethod) {
-	console.log('getData...');
+	logger.debug('getData...');
 	
 	var objectMap = {}; // populate this map
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-		console.log('Connecting...');
+		logger.debug('Connecting...');
 		
 		// Handle connection errors
 		if(err) {
 			done();
-			console.log(err);
+			logger.debug(err);
 			return res.status(500).json({success: false, data: err});
 		}
 		
 		// SQL Query > Select Data
-		console.log('Run Query...');
+		logger.debug('Run Query...');
 		const query = client
 						.query('SELECT * FROM '+dbObject.tableName+';')
 						.on('row', function(row) {
-							console.log('Row Id: ' + row.id);
-							console.log(JSON.stringify(row));
+							logger.debug('Row Id: ' + row.id);
+							logger.debug(JSON.stringify(row));
 							
 							var obj = {};
 							for(var i = 0; i < dbObject.cols.length; i++){
@@ -140,7 +141,7 @@ module.exports.getData = function(dbObject, resultMethod) {
 		query.on('end', function() {
 			done();
 			
-			console.log('getData Done: ' + dbObject.tableName + ': ' + JSON.stringify(objectMap));
+			logger.debug('getData Done: ' + dbObject.tableName + ': ' + JSON.stringify(objectMap));
 			if(resultMethod) resultMethod(objectMap);
 		});
 	});

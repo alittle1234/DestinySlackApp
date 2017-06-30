@@ -1,4 +1,4 @@
-const _debug = process.env.IS_DEBUG;
+const _debug = process.env.IS_DEBUG == 'true';
 
 module.exports.debug = function (message){
 	if(_debug){
