@@ -288,11 +288,12 @@ module.exports = function (siteData) {
 		message.attachString = JSON.stringify(message.attachments);
 		postMessage(message, siteData.appAuthToken, function(messageId){
 			debug('in post callback. messageId:' + messageId);
-			// send update message
-			sendMessageUpdateMenu(payload.response_url, messageId);
 			
 			// store message
 			addMessage(messageId, message, payload, user);
+			
+			// send update message
+			sendMessageUpdateMenu(payload.response_url, messageId);
 		});
 	}
 
@@ -307,6 +308,23 @@ module.exports = function (siteData) {
 	}
 
 	function sendMessageUpdateMenu(responseURL, messageId){
+		var messageClass = messageCache[messageId];
+		var actions = [];
+		if(messageClass.messageData.join.hasJoin){
+			actions.push({
+				"name": action.removeJoin,
+				"value": messageId,
+				"text": "Remove Join",
+				"type": "button"
+			});
+		}else{
+			actions.push({
+				"name": action.addJoin,
+				"value": messageId,
+				"text": "Add Join",
+				"type": "button"
+			});
+		}
 		var message = {
 			"attachments": [
 				{
@@ -315,29 +333,8 @@ module.exports = function (siteData) {
 					"callback_id": callbackIds.updateMesgMenu + messageId,
 					"color": staticProps.message.privateColor,
 					"attachment_type": "default",
-					"replace_original": false,
-					"actions": [
-						{
-							"name": action.addJoin,
-							"value": messageId,
-							"text": "Add Join",
-							"type": "button"
-						},
-						{
-							"name": action.removeJoin,
-							"value": messageId,
-							"text": "Remove Join",
-							"type": "button"
-						},
-						/* {
-							"name": action.askgeton,
-							"value": action.askgeton,
-							"text": "Getting On?",
-							"type": "button"
-						} */
-						// TODO menu type, "others"
-						// a menu drop-down of stats, status, etc
-					]
+					"replace_original": true,
+					"actions": actions
 				}
 			]
 		}
@@ -408,50 +405,82 @@ module.exports = function (siteData) {
 	/* 	the join question attachment for orginal message posts
 	* 	buttons triger the 'join' action whcih updates the poll results
 	*/
-	function getJoinAttachment(username, ask=true, user){
-		return {
-					"text": ask ? staticProps.message.joinAsk : "",
-					"fallback": "Join " + username + " on Destiny?",
-					"callback_id": callbackIds.joinAsk,
-					"color": staticProps.message.publicColor,
-					"attachment_type": "default", // TODO what is this?
-					"thumb_url": users.getThumbUrl(user),
+	function getJoinAttachment(username, ask=true, user, message){
+		var attach = {
+			"text": ask ? staticProps.message.joinAsk : "",
+			"fallback": "Join " + username + " on Destiny?",
+			"callback_id": callbackIds.joinAsk,
+			"color": staticProps.message.publicColor,
+			"attachment_type": "default",
+			"thumb_url": users.getThumbUrl(user),
 
-					"actions": [
-						{
-							"name": action.join,
-							"value": "yes",
-							"text": "Yes",
-							"type": "button"
-						},
-						{
-							"name": action.join,
-							"value": "maybe",
-							"text": "Maybe",
-							"type": "button"
-						},
-						{
-							"name": action.join,
-							"value": "no",
-							"text": "No",
-							"type": "button"
-						}
-					]
-				}
+			"actions": [{
+				"name": action.join,
+				"value": "yes",
+				"text": "Yes",
+				"type": "button"
+			},{
+				"name": action.join,
+				"value": "no",
+				"text": "No",
+				"type": "button"
+			}]
+		}
+		
+		if(message){
+			attach.actions = [];
+			if(message.messageData.join.hasYes){
+				var attach.actions.push({
+					"name": action.join,
+					"value": "yes",
+					"text": "Yes",
+					"type": "button"
+				});
+			}
+			if(message.messageData.join.hasMaybe){
+				var attach.actions.push({
+					"name": action.join,
+					"value": "maybe",
+					"text": "Maybe",
+					"type": "button"
+				});
+			}
+			if(message.messageData.join.hasNo){
+				var attach.actions.push({
+					"name": action.join,
+					"value": "no",
+					"text": "No",
+					"type": "button"
+				});
+			}
+			if(message.messageData.join.hasStandby){
+				var attach.actions.push({
+					"name": action.join,
+					"value": "standby",
+					"text": "Standby",
+					"type": "button"
+				});
+			}
+		}
+		
+		return attach;
 	}
 
 	/* 
 	*	the "poll results" attachment with fields
 	*/
-	function getPollAttachment(fieldArray){
+	function getJoinPollAttachment(fieldArray){
 		return {
-					"callback_id": callbackIds.joinPoll,
-					"fallback": "Join Poll",
-					"color": staticProps.message.publicColor,
-					"fields": fieldArray
-				}
+			"callback_id": callbackIds.joinPoll,
+			"fallback": "Join Poll",
+			"color": staticProps.message.publicColor,
+			"fields": fieldArray
+		};
 	}
 
+	/* 
+	*	handle add join poll action
+	*/
 	function handleAddJoin(payload){
 		debug("handleAddJoin...");
 		
@@ -467,7 +496,7 @@ module.exports = function (siteData) {
 		var joinPollIndex = 0; // TODO search for join poll
 		
 		// set second attachment as fields
-		message.attachments[joinPollIndex] = getJoinAttachment(getNameRef(payload.user), true, payload.user);
+		message.attachments[joinPollIndex] = getJoinAttachment(getNameRef(payload.user), true, payload.user, messageClass);
 		// replace original
 		message.replace_original = true;
 		
@@ -475,10 +504,15 @@ module.exports = function (siteData) {
 		message.channel = payload.channel.id;
 		// stringify message attachments
 		message.attachString = JSON.stringify(message.attachments);
-		slack.sendUpdateMessage(ts, message, siteData.appAuthToken);
+		slack.postUpdateMessage(ts, message, siteData.appAuthToken);
+
+		// update the "update menu"
+		sendMessageUpdateMenu(payload.response_url, ts);
 	}
 
-
+	/* 
+	*	handle remove join poll action
+	*/
 	function handleRemoveJoin(payload){
 		debug("handleRemoveJoin...");
 		
@@ -502,69 +536,118 @@ module.exports = function (siteData) {
 		message.channel = payload.channel.id;
 		// stringify message attachments
 		message.attachString = JSON.stringify(message.attachments);
-		slack.sendUpdateMessage(ts, message, siteData.appAuthToken);
+		slack.postUpdateMessage(ts, message, siteData.appAuthToken);
+
+		// update the "update menu"
+		sendMessageUpdateMenu(payload.response_url, ts);
 	}
 
-	function getJoinFields(message){
-		const fieldValSplit = ", ";
+	const fieldValSplit = ", ";
+	/* 
+	*	the join poll result field array
+	*/
+	function getJoinResultFields(message){
 		var fieldsArray = [];
 		if(message.messageData.join.hasYes){
 			fieldsArray.push({
-							"title": "Yes",
-							"value": "",
-							"short": false
-						});
-			if(message.messageData.join.joins){
-				var joinValues = message.messageData.join.joins;
-				for(var i = 0; i < joinValues.size; i++){
-					fieldsArray[fieldsArray.length-1].value += (k > 0 ? fieldValSplit : "") + joinValues[i];// TODO get users name
-				}
+				"title": "Yes",
+				"value": "",
+				"short": false
+			});
+			populateField(message, "yess", fieldsArray[fieldsArray.length-1]);
+		}
+		
+		if(message.messageData.join.hasStandby){
+			fieldsArray.push({
+				"title": "Standby",
+				"value": "",
+				"short": false
+			});
+			populateField(message, "standbys", fieldsArray[fieldsArray.length-1]);
+		}
+		
+		if(message.messageData.join.hasMaybe){
+			fieldsArray.push({
+				"title": "Maybe",
+				"value": "",
+				"short": false
+			});
+			populateField(message, "maybes", fieldsArray[fieldsArray.length-1]);
+		}
+		
+		if(message.messageData.join.hasNo){
+			fieldsArray.push({
+				"title": "No",
+				"value": "",
+				"short": false
+			});
+			populateField(message, "nos", fieldsArray[fieldsArray.length-1]);
+		}
+		
+		return fieldsArray;
+	}
+	
+	function populateField(message, joinField, fieldArray){
+		if(message.messageData.join[joinField]){
+			var joinValues = message.messageData.join[joinField];
+			for(var i = 0; i < joinValues.size; i++){
+				fieldArray.value += (k > 0 ? fieldValSplit : "") + getNameRef(joinValues[i]);
 			}
 		}
-		return fieldsArray;
 	}
 
 	// add or remove from message.messageData.join[choice]
 	function addUserToJoinArea(user, choice, message){
-		// TODO *** check limit
-		// remove from all others
 		if(choice == "yes"){
-			var joinValues = [];
-			if(message.messageData.join.yess){
-				joinValues = message.messageData.join.yess;
-			}
-			// remove user from array
-			valueArray.splice(valueArray.indexOf(user.id), 1);
-			// add user to array
-			valueArray.push(user.id);
-			
-			// remove Nos
-			if(message.messageData.join.nos){
-				joinValues = message.messageData.join.nos;
-			}
-			valueArray.splice(valueArray.indexOf(user.id), 1);
-			
-			// remove maybes
-			if(message.messageData.join.maybes){
-				joinValues = message.messageData.join.maybes;
-			}
-			valueArray.splice(valueArray.indexOf(user.id), 1);
-			
-			// remove standbys
-			if(message.messageData.join.standbys){
-				joinValues = message.messageData.join.standbys;
-			}
-			valueArray.splice(valueArray.indexOf(user.id), 1);
+			addAndRemove(user, message, "yess", ["nos", "maybes", "standbys"]);
 			
 		} else if(choice == "maybe"){
-			// etc...
+			addAndRemove(user, message, "maybes", ["nos", "yess", "standbys"]);
 			
 		} else if(choice == "no"){
-			// etc...
+			addAndRemove(user, message, "nos", ["yess", "maybes", "standbys"]);
 			
 		} else if(choice == "standby"){
-			// etc...
+			addAndRemove(user, message, "standbys", ["nos", "maybes", "yess"]);
 			
+		}
+	}
+	
+	// remove user from field
+	function addAndRemove(user, message, joinField, removeArray){
+		var joinValues = [];
+		if(message.messageData.join[joinField]){
+			joinValues = message.messageData.join[joinField];
+		}else{
+			message.messageData.join[joinField] = joinValues;
+		}
+		
+		// remove user from array
+		var index = joinValues.indexOf(user.id);
+		if(index > -1){
+			joinValues.splice(index, 1);
+		}else{
+			// add user, check limit
+			if(limit && limit > 0){
+				if(joinValues.length < limit){
+					joinValues.push(user.id);
+				}
+			}else{
+				joinValues.push(user.id);
+			}
+		}
+		
+		if(removeArray){
+			for(area : removeArray){
+				// remove from area array
+				if(message.messageData.join[area]){
+					var removeValues = message.messageData.join[area];
+					var rIndex = removeValues.indexOf(user.id);
+					if(index > -1){
+						removeValues.splice(rIndex, 1);
+					}
+				}
+			}
 		}
 	}
 
@@ -585,17 +668,14 @@ module.exports = function (siteData) {
 		
 		var message = messageClass.orginalMessage;
 		// set second attachment with fields
-		message.attachments[1] = getPollAttachment(getJoinFields(messageClass)); // set at index 1 since join poll should be at 0
+		message.attachments[1] = getJoinPollAttachment(getJoinResultFields(messageClass)); // set at index 1 since join poll should be at 0
 		// replace original
 		message.replace_original = true;
 		// update channel for message api
 		message.channel = payload.channel.id;
 		// stringify message attachments
 		message.attachString = JSON.stringify(message.attachments);
-		slack.sendUpdateMessage(message.ts, message, siteData.appAuthToken, function(){
-			// TODO need to update "update menu" message... 
-			// respond immediatly with 'clearUpdateMenu' at the end of all actions
-		});
+		slack.postUpdateMessage(message.ts, message, siteData.appAuthToken);
 	}
 
 
