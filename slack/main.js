@@ -499,11 +499,10 @@ module.exports.handleDestinyReq = function (req, res){
 
 		messageClass.messageData.join.hasJoin = true;
 		messageClass.dateModified = Date.now();
-		
-		var joinPollIndex = 0; // TODO search for join poll
-		
+				
 		// set second attachment as fields
-		message.attachments[joinPollIndex] = getJoinAttachment(getNameRef(payload.user), true, payload.user, messageClass);
+		message.attachments[0] = getJoinAttachment(getNameRef(payload.user), true, payload.user, messageClass);
+		message.attachments[1] = getJoinPollAttachment(getJoinResultFields(messageClass));
 		// replace original
 		message.replace_original = true;
 		
@@ -531,11 +530,11 @@ module.exports.handleDestinyReq = function (req, res){
 
 		messageClass.messageData.join.hasJoin = false;
 		messageClass.dateModified = Date.now();
+				
+		// remove join ask and poll results attachments
+		message.attachments[0] = null;
+		message.attachments[1] = null;
 		
-		var joinPollIndex = 0;
-		
-		// set second attachment as fields
-		message.attachments[joinPollIndex] = null;
 		// replace original
 		message.replace_original = true;
 		
@@ -554,10 +553,6 @@ module.exports.handleDestinyReq = function (req, res){
 	*	the join poll result field array
 	*/
 	function getJoinResultFields(message){
-		debug("yes[]:");
-		debug(message.messageData.join["yess"]);
-		debug("join:");
-		debug(message.messageData.join);
 		var fieldsArray = [];
 		if(message.messageData.join.hasYes){
 			fieldsArray.push({
@@ -566,9 +561,6 @@ module.exports.handleDestinyReq = function (req, res){
 				"short": false
 			});
 			populateField(message, "yess", fieldsArray[fieldsArray.length-1]);
-			
-			debug("populateField:");
-			debug(fieldsArray);
 		}
 		
 		if(message.messageData.join.hasStandby){
@@ -615,7 +607,6 @@ module.exports.handleDestinyReq = function (req, res){
 	// add or remove from message.messageData.join[choice]
 	function addUserToJoinArea(user, choice, message){
 		if(choice == "yes"){
-			debug('chose yes');
 			addAndRemove(user, message, "yess", ["nos", "maybes", "standbys"], 
 				message.messageData.join.hasYesLimit ? message.messageData.join.yesLimit : -1);
 			
@@ -635,9 +626,7 @@ module.exports.handleDestinyReq = function (req, res){
 	function addAndRemove(user, message, joinArea, removeArray, limit){
 		var joinValues = [];
 		if(message.messageData.join[joinArea]){
-			debug('found field');
 			joinValues = message.messageData.join[joinArea];
-			debug(joinValues);
 		}else{
 			message.messageData.join[joinArea] = joinValues;
 		}
