@@ -42,27 +42,28 @@ class Message{
 	}
 }
 
-var origMesCache = {
-	
-}
 
 var messageData={
 	join: {
 		hasJoin: true, 
+		
+		hasYes: true,
 		hasNo: true, 
 		hasMaybe: true, 
 		hasStandby: true, 
+		
 		hasYesLimit: true,
-		joins: ["Uid1"],
+		
+		standbys: ["Uid1"],
 		yess: ["Uid1"],
 		nos: ["Uid1"],
 		maybes: ["Uid1"],
+		
 		yesLimit: 6,
 	},
 	activity: ["Trials", "Raid"],
 	date: 12345,
 	localTz: "Central",
-	
 }
 
 class MessageData{
@@ -73,14 +74,6 @@ class MessageData{
 		this.timeZone = timeZone;
 	}
 }
-// origMesCache[message.originalTs] = message;
-// update cache
-
-// store cache
-
-// refresh cache
-
-// remove stale from cache
 
 module.exports.Message = Message;
 module.exports.MessageData = MessageData;

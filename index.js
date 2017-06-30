@@ -1,15 +1,16 @@
-const express = require('express');
-const app = express();
+const express 		= require('express');
+const app 			= express();
 
-const request = require('request');
-const bodyParser = require('body-parser');
+const request 		= require('request');
+const bodyParser 	= require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
-const querystring = require('querystring');
+const querystring 	= require('querystring');
 
 
-const users 	= require('./user');
-const site 		= require('./site');
-const db 		= require('./db');
+const users 		= require('./user');
+const site 			= require('./site');
+const db 			= require('./db');
+const logger 		= require('./logger');
 
 
 app.set('port', (process.env.PORT || 5000));
@@ -45,13 +46,13 @@ app.listen(app.get('port'), function() {
 * 	handle get: return user json
 */
 app.get('/users/', function(req, res) {
-	console.log('Asking for users...');
+	logger.debug('Asking for users...');
 	users.getUsers(function(userData){
-		console.log('printUsers...');
-		console.log(JSON.stringify(userData, null, 2));
+		logger.debug('printUsers...');
+		logger.debug(JSON.stringify(userData, null, 2));
 		res.send(JSON.stringify(userData, null, 2));
 	});
-	console.log('Done Asking for users...');
+	logger.debug('Done Asking for users...');
 });
 
 
@@ -81,10 +82,11 @@ function initSiteData(objectMap){
 
 // *** initialize site data on startup
 db.getData( site.site_db, function(objectMap){
-	console.log('Performing Site Data Callback...');
+	logger.debug('Performing Site Data Callback...');
 	initSiteData(objectMap);
 });
 
+const main 		= require('./slack/main')(siteData);
 
 
 /* 
@@ -92,11 +94,11 @@ db.getData( site.site_db, function(objectMap){
 */
 app.post('/d', urlencodedParser, function(req, res) {
     if (!req.body) {
-		console.error('no req body' + req);
+		logger.error('no req body' + req);
 		return res.sendStatus(400);
 	}
 		
-	handleDestinyReq(req, res);
+	main.handleDestinyReq(req, res);
 });
 
 
@@ -105,10 +107,10 @@ app.post('/d', urlencodedParser, function(req, res) {
 */
 app.post('/d/actions', urlencodedParser, function(req, res) {
     if (!req.body) {
-		console.error('no req body' + req);
+		logger.error('no req body' + req);
 		return res.sendStatus(400);
 	}
 	
-	handleDestinyReq(req, res);
+	main.handleDestinyReq(req, res);
 });
 

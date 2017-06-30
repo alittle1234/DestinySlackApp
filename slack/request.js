@@ -1,5 +1,22 @@
-const querystring = require('querystring');
-const request = require('request');
+const querystring 	= require('querystring');
+const request 		= require('request');
+
+const logger 		= require.main.require('./logger');
+
+const slack = {
+	method : {
+		uri: 'https://slack.com/api/',
+		chat : {
+			update: 'chat.update',
+			post: 'chat.postMessage',
+		}
+	}
+}
+
+const reqType = {
+	post: 'POST',
+	get: 'GET',
+}
 
 // temp send message
 function sendMessage(responseURL){
@@ -36,17 +53,17 @@ function sendMessage(responseURL){
 			}
 		]
 	}
-	sendMessageToSlackResponseURL(responseURL, message)
+	postMessageToSlackResponseURL(responseURL, message)
 }
 
 
 /* 
 *	send the JSONmessage as POST to the responseURL
 */
-function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+module.exports.postMessageToSlackResponseURL = function (responseURL, JSONmessage){
     var postOptions = {
         uri: responseURL,
-        method: 'POST',
+        method: reqType.post,
         headers: {
             'Content-type': 'application/json'
         },
@@ -54,10 +71,10 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
     }
     request(postOptions, (error, response, body) => {
         if (error){
-            console.error(error);
+            logger.error(error);
         }
-		console.log("Response...");
-		//console.log(response);
+		logger.debug("Response...");
+		//logger.debug(response);
     })
 }
 
@@ -65,11 +82,7 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage){
 /* 
 *	send a slack api update message request
 */
-function updateMessage(timestamp, message, token){
-	// message.channel
-	// message.text
-	// message.attachments = [{"normalAttr":"somethingElse"}]
-	// message.as_user = false?
+module.exports.postUpdateMessage = function (timestamp, message, token){
 	var data = querystring.stringify({
 		token: 		token,
 		ts: 		timestamp,
@@ -79,19 +92,23 @@ function updateMessage(timestamp, message, token){
 		as_user:	'false'
     });
 	
-	sendDataToSlackApi('chat.update', data);
+	postDataToSlackApi(slack.method.chat.update, data);
 }
 
-function postMessage( message, token, postResponse){
+/* 
+*	send a slack api a post message request
+*/
+module.exports.postMessage = function ( message, token, postResponse){
 	var data = querystring.stringify({
 		token: 		token,
 		channel:	message.channel,
 		text:		message.text,
 		icon_url:	message.icon_url,
-		attachments:message.attachString
+		attachments:message.attachString,
+		as_user:	'false'
     });
 	
-	sendDataToSlackApi('chat.postMessage', data, function(body){
+	postDataToSlackApi(slack.method.chat.post, data, function(body){
 		if(postResponse){
 			// json
 			var j = JSON.parse(body);
@@ -103,34 +120,33 @@ function postMessage( message, token, postResponse){
 
 
 // TODO probalby needs error and response functions as params?
-function sendDataToSlackApi(methodApi, data, responseCallback){
+function postDataToSlackApi(methodApi, data, responseCallback){
 	var options = {
-		uri: 'https://slack.com/api/' + methodApi,
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Content-Length': data.length
-		},
-		body: data
-		
+		uri: 		slack.method.uri + methodApi,
+		method: 	reqType.post,
+		headers: 	{
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Content-Length': data.length
+					},
+		body:		 data
 	};
 	
-	console.log("sending data...");
-	console.log(data);
+	logger.debug("sending data...");
+	logger.debug(data);
     
     request(options, (error, response, body) => {
         if (error){
-            console.error(error);
+            logger.error(error);
         }
-		console.log("sendDataToSlackApi Response...");
-		//console.log(response);
-		console.log(response.body);
+		logger.debug("postDataToSlackApi Response...");
+		//logger.debug(response);
+		logger.debug(response.body);
 
 		if(responseCallback) 
 			responseCallback(response.body);
 		
 		response.on('data', function (chunk) {
-			console.log("body: " + chunk);
+			logger.debug("body: " + chunk);
 			
 		});
     })
@@ -140,18 +156,18 @@ function sendDataToSlackApi(methodApi, data, responseCallback){
 /* 
 * 	perform a get request. send data collected to callback
 */
-function doGetData(url, callback){
-	console.log('doGet...');
+module.exports.doGetData = function (url, callback){
+	logger.debug('doGet...');
 	dataStr = '';
 	request
 		.get(url)
 		.on('response', function(response) {
-			console.log(response.statusCode);
-			console.log(response.headers['content-type']);
-			//console.log("response: " + JSON.stringify(response, null, 2));
+			logger.debug(response.statusCode);
+			logger.debug(response.headers['content-type']);
+			//logger.debug("response: " + JSON.stringify(response, null, 2));
 		})
 		.on("data", function(chunk) {
-			//console.log("BODY: " + chunk);
+			//logger.debug("BODY: " + chunk);
 			dataStr += chunk;
 		})
 		.on("end", function() {

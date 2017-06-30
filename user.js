@@ -1,8 +1,8 @@
+const db 		= require('./db');
+const logger 	= require('./logger');
 
-var db = require('./db');
 
-
-var def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab9229b8164aff89c7801f332b54c.jpg";
+const def_thum_url = "https://www.bungie.net/common/destiny_content/icons/971ab9229b8164aff89c7801f332b54c.jpg";
 //"https://www.bungie.net/common/destiny_content/icons/61110a769953428def89124e0fad7508.jpg";
 
 var users_cache = null;
@@ -25,7 +25,7 @@ module.exports.getUserCache = function (){
 * 	get a user obj
 */
 module.exports.getUser = function (userId, userName, callback){
-	console.log('user.getUser(userId)...');
+	logger.debug('user.getUser(userId)...');
 	// check cache not null
 		// get lates users --> async
 	if(!users_cache || users_cache == null){
@@ -40,7 +40,7 @@ module.exports.getUser = function (userId, userName, callback){
 }
 
 function localGetUser(userId, userName, callback){
-	console.log('user.localGetUser(userId)...');
+	logger.debug('user.localGetUser(userId)...');
 	// if user null
 		// store new user w/ id --> async
 	if(!users_cache[userId]){
@@ -67,7 +67,7 @@ function newUser(userId, userName, imgUrl, bungieId){
 * 	get latest users
 */
 module.exports.getUsers = function (callback){
-	console.log('user.getUsers(db)...');
+	logger.debug('user.getUsers(db)...');
 	db.getUsers(callback);
 }
 
@@ -78,7 +78,7 @@ module.exports.getUsers = function (callback){
 module.exports.getThumbUrl = function (user){
 	if(users_cache && users_cache[user.id]
 		&& users_cache[user.id].img_url){
-		console.log('getThumbUrl...' + users_cache[user.id].img_url  );
+		logger.debug('getThumbUrl...' + users_cache[user.id].img_url  );
 		return users_cache[user.id].img_url;
 	}
 	return def_thum_url;
@@ -100,10 +100,10 @@ module.exports.getPlayerName = function (user){
 * 	set the name or image url of a user and store in the database
 */
 module.exports.setAndStoreUser = function (userId, name, image, bungieId){
-	console.log('setAndStoreUser...' + userId + ' ' + name + ' ' + image  );
+	logger.debug('setAndStoreUser...' + userId + ' ' + name + ' ' + image  );
 	
 	if(!users_cache[userId]){
-		console.log('new user...');
+		logger.debug('new user...');
 		users_cache[userId] = newUser(userId, null, name, image, bungieId);
 	}else{
 		
@@ -120,8 +120,8 @@ module.exports.setAndStoreUser = function (userId, name, image, bungieId){
 	}
 	
 	
-	console.log('Users Pre-Store...');
-	console.log(JSON.stringify(users_cache, null, 2));
+	logger.debug('Users Pre-Store...');
+	logger.debug(JSON.stringify(users_cache, null, 2));
 	
 	storeUsers();
 }
@@ -131,7 +131,7 @@ module.exports.setAndStoreUser = function (userId, name, image, bungieId){
 * 	store the users in db
 */
 function storeUsers(){
-	console.log('storeUsers...');
+	logger.debug('storeUsers...');
 	db.storeUsers(users_cache);
 }
 
@@ -140,7 +140,7 @@ function storeUsers(){
 * 	set the user destiny name
 */
 module.exports.setUserName = function (userId, name){
-	console.log('setUserName...');
+	logger.debug('setUserName...');
 	if(!users_cache || !users_cache[userId]){
 		// get latest users than add new data to db
 		exports.getUsers(function(userData){
@@ -156,7 +156,7 @@ module.exports.setUserName = function (userId, name){
 * 	set the user image url
 */
 module.exports.setUserImage = function (userId, image){
-	console.log('setUserImage...');
+	logger.debug('setUserImage...');
 	if(!users_cache || !users_cache[userId]){
 		// get latest users than add new data to db
 		exports.getUsers(function(userData){
