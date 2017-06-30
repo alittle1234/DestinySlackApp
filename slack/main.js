@@ -662,13 +662,15 @@ module.exports.handleDestinyReq = function (req, res){
 			debug(removeArray);
 			for(var i = 0; i < removeArray.length; i++){
 				// remove from area array
-				if(message.messageData.join[removeArray[i]]){
+				var removeValues = message.messageData.join[removeArray[i]];
+				if(removeValues){
 					debug('area:');
 					debug(removeArray[i]);
-					var removeValues = message.messageData.join[removeArray[i]];
 					var rIndex = removeValues.indexOf(user.id);
 					if(index > -1){
+						debug('removing:');
 						removeValues.splice(rIndex, 1);
+						message.messageData.join[removeArray[i]] = removeValues;
 					}
 				}
 			}
@@ -676,6 +678,7 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		debug('done');
 		debug(joinValues);
+		debug(message.messageData.join);
 	}
 
 	/* 	
