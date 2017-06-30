@@ -683,7 +683,7 @@ module.exports.handleDestinyReq = function (req, res){
 		message.channel = payload.channel.id;
 		// stringify message attachments
 		message.attachString = JSON.stringify(message.attachments);
-		slack.postUpdateMessage(message.ts, message, siteData.appAuthToken);
+		slack.postUpdateMessage(payload.message_ts, message, siteData.appAuthToken);
 	}
 
 
