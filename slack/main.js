@@ -85,11 +85,7 @@ var siteData = site.getSiteData();
 */
 module.exports.handleDestinyReq = function (req, res){
 	res.status(200).end(); // prevents weird time-out response
-	
-	debug('siteData: ' + siteData );
-	debug('siteDataS:' + JSON.stringify(siteData, null, 2));
-	debug('siteDataGS:' + JSON.stringify(site.getSiteData(), null, 2));
-	//debug('siteDataP:' + JSON.parse(siteData));
+	siteData = site.getSiteData();
 	
 	var concat = '';
 	try{
