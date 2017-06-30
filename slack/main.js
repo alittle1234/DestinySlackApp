@@ -258,13 +258,9 @@ module.exports = function (siteData) {
 		debug('SendImOn: \n' + "payload:" + JSON.stringify(payload, null, 2)
 		+ "\n user:" + JSON.stringify(user, null, 2));
 		
-		
-		// clear private message
-		//if(payload && payload.channel) clearPrivate(payload.response_url);
-		
 		var username = getNameRef(user);
 		var title = "_*" + username + "*" + " is on Destiny!_";
-		
+		// TODO getMessageTitle(message, user); // get title based on message type and other properties
 		var message = {
 			"text": title,
 			"username": staticProps.appName,
@@ -274,7 +270,6 @@ module.exports = function (siteData) {
 				getJoinAttachment(username, true, user)
 			]
 		}
-		// postMessageToSlackResponseURL(siteData.generalWebhook, message);
 		
 		// update channel id for message api
 		if(payload.channel_id){
@@ -430,7 +425,7 @@ module.exports = function (siteData) {
 		if(message){
 			attach.actions = [];
 			if(message.messageData.join.hasYes){
-				var attach.actions.push({
+				attach.actions.push({
 					"name": action.join,
 					"value": "yes",
 					"text": "Yes",
@@ -438,7 +433,7 @@ module.exports = function (siteData) {
 				});
 			}
 			if(message.messageData.join.hasMaybe){
-				var attach.actions.push({
+				attach.actions.push({
 					"name": action.join,
 					"value": "maybe",
 					"text": "Maybe",
@@ -446,7 +441,7 @@ module.exports = function (siteData) {
 				});
 			}
 			if(message.messageData.join.hasNo){
-				var attach.actions.push({
+				attach.actions.push({
 					"name": action.join,
 					"value": "no",
 					"text": "No",
@@ -454,7 +449,7 @@ module.exports = function (siteData) {
 				});
 			}
 			if(message.messageData.join.hasStandby){
-				var attach.actions.push({
+				attach.actions.push({
 					"name": action.join,
 					"value": "standby",
 					"text": "Standby",
@@ -638,7 +633,7 @@ module.exports = function (siteData) {
 		}
 		
 		if(removeArray){
-			for(area : removeArray){
+			for(var area in removeArray){
 				// remove from area array
 				if(message.messageData.join[area]){
 					var removeValues = message.messageData.join[area];
