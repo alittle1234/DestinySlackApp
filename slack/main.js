@@ -566,6 +566,9 @@ module.exports.handleDestinyReq = function (req, res){
 				"short": false
 			});
 			populateField(message, "yess", fieldsArray[fieldsArray.length-1]);
+			
+			debug("populateField:");
+			debug(fieldsArray);
 		}
 		
 		if(message.messageData.join.hasStandby){
@@ -655,9 +658,12 @@ module.exports.handleDestinyReq = function (req, res){
 		}
 		
 		if(removeArray){
+			debug('removeArray');
 			for(var area in removeArray){
 				// remove from area array
 				if(message.messageData.join[area]){
+					debug('area:');
+					debug(area);
 					var removeValues = message.messageData.join[area];
 					var rIndex = removeValues.indexOf(user.id);
 					if(index > -1){
