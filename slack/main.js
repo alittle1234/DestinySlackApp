@@ -2,6 +2,7 @@
 const Message 		= require.main.require('./message').Message;
 const MessageData	= require.main.require('./message').MessageData;
 
+const users 		= require.main.require('./user');
 const bungie 		= require.main.require('./bungie');
 const slack 		= require.main.require('./slack/request');
 const logger 		= require.main.require('./logger');
