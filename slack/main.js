@@ -554,11 +554,15 @@ module.exports.handleDestinyReq = function (req, res){
 	*	the join poll result field array
 	*/
 	function getJoinResultFields(message){
+		debug("yes[]:");
+		debug(message.messageData.join["yess"]);
+		debug("join:");
+		debug(message.messageData.join);
 		var fieldsArray = [];
 		if(message.messageData.join.hasYes){
 			fieldsArray.push({
-				"title": "Yes",
-				"value": "",
+				title: "Yes",
+				value: "",
 				"short": false
 			});
 			populateField(message, "yess", fieldsArray[fieldsArray.length-1]);
@@ -566,8 +570,8 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		if(message.messageData.join.hasStandby){
 			fieldsArray.push({
-				"title": "Standby",
-				"value": "",
+				title: "Standby",
+				value: "",
 				"short": false
 			});
 			populateField(message, "standbys", fieldsArray[fieldsArray.length-1]);
@@ -575,8 +579,8 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		if(message.messageData.join.hasMaybe){
 			fieldsArray.push({
-				"title": "Maybe",
-				"value": "",
+				title: "Maybe",
+				value: "",
 				"short": false
 			});
 			populateField(message, "maybes", fieldsArray[fieldsArray.length-1]);
@@ -584,8 +588,8 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		if(message.messageData.join.hasNo){
 			fieldsArray.push({
-				"title": "No",
-				"value": "",
+				title: "No",
+				value: "",
 				"short": false
 			});
 			populateField(message, "nos", fieldsArray[fieldsArray.length-1]);
@@ -594,11 +598,11 @@ module.exports.handleDestinyReq = function (req, res){
 		return fieldsArray;
 	}
 	
-	function populateField(message, joinField, fieldArray){
+	function populateField(message, joinField, field){
 		if(message.messageData.join[joinField]){
 			var joinValues = message.messageData.join[joinField];
 			for(var i = 0; i < joinValues.size; i++){
-				fieldArray.value += (k > 0 ? fieldValSplit : "") + getNameRef(joinValues[i]);
+				field.value += (i > 0 ? fieldValSplit : "") + getNameRef(joinValues[i]);
 			}
 		}
 	}
