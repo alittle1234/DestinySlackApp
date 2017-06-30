@@ -632,14 +632,14 @@ module.exports.handleDestinyReq = function (req, res){
 	}
 	
 	// remove user from field
-	function addAndRemove(user, message, joinField, removeArray, limit){
+	function addAndRemove(user, message, joinArea, removeArray, limit){
 		var joinValues = [];
-		if(message.messageData.join[joinField]){
+		if(message.messageData.join[joinArea]){
 			debug('found field');
-			joinValues = message.messageData.join[joinField];
+			joinValues = message.messageData.join[joinArea];
 			debug(joinValues);
 		}else{
-			message.messageData.join[joinField] = joinValues;
+			message.messageData.join[joinArea] = joinValues;
 		}
 		
 		// remove user from array
@@ -659,12 +659,12 @@ module.exports.handleDestinyReq = function (req, res){
 		
 		if(removeArray){
 			debug('removeArray');
-			for(var area in removeArray){
+			for(var i = 0; i < removeArray.length; i++){
 				// remove from area array
-				if(message.messageData.join[area]){
+				if(message.messageData.join[removeArray[i]){
 					debug('area:');
-					debug(area);
-					var removeValues = message.messageData.join[area];
+					debug(removeArray[i]);
+					var removeValues = message.messageData.join[removeArray[i]];
 					var rIndex = removeValues.indexOf(user.id);
 					if(index > -1){
 						removeValues.splice(rIndex, 1);
