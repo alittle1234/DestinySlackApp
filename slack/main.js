@@ -532,8 +532,12 @@ module.exports.handleDestinyReq = function (req, res){
 		messageClass.dateModified = Date.now();
 				
 		// remove join ask and poll results attachments
-		message.attachments[0] = null;
-		message.attachments[1] = null;
+		if(message.attachments && message.attachments[0].callback_id == callbackIds.joinAsk){
+			message.attachments.splice(0, 1);
+		}
+		if(message.attachments && message.attachments[0].callback_id == callbackIds.joinPoll){
+			message.attachments.splice(0, 1);
+		}
 		
 		// replace original
 		message.replace_original = true;
