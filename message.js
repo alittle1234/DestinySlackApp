@@ -45,21 +45,13 @@ class Message{
 
 var messageData={
 	join: {
-		hasJoin: true, 
-		
-		hasYes: true,
-		hasNo: true, 
-		hasMaybe: true, 
-		hasStandby: true, 
-		
-		hasYesLimit: true,
-		
-		standbys: ["Uid1"],
-		yess: ["Uid1"],
-		nos: ["Uid1"],
-		maybes: ["Uid1"],
-		
-		yesLimit: 6,
+		hasJoin: true, 		
+		buttons: {
+			"yes" : {
+				uids: [],
+				limit: 0
+			}
+		}
 	},
 	activity: ["Trials", "Raid"],
 	date: 12345,

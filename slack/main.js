@@ -1,21 +1,14 @@
-
-const Message 		= require.main.require('./message').Message;
-const MessageData	= require.main.require('./message').MessageData;
-
 const users 		= require.main.require('./user');
 const bungie 		= require.main.require('./bungie');
 const slack 		= require.main.require('./slack/request');
 const logger 		= require.main.require('./logger');
 const site  		= require.main.require('./site');
 
-/* 
-const tempMs = new Message("1234", "", Date.now(), Date.now(), "uid1234", new MessageData({hasJoin:true}, null, Date.now(), "Eastern"), null);
-messageCache[tempMs.timestamp] = tempMs;
-debug(messageCache[tempMs.timestamp].messageData.join);
- */
+const Message 		= require.main.require('./message').Message;
+const MessageData	= require.main.require('./message').MessageData;
+
  
 //var icon_url 		= ""; //"http://tiles.xbox.com/tiles/VV/QY/0Wdsb2JhbC9ECgQJGgYfVilbL2ljb24vMC84MDAwAAAAAAAAAP43VEo=.jpg"; 
-
 const staticProps = {
 	appName : "Destiny App",
 	iconUrl : "",
@@ -78,6 +71,45 @@ const activity = {
 	strike : 	"Strike",
 }
 
+
+const joinButtons = {
+	yes : {
+		"name": action.join,
+		"value": "yes",
+		"text": "Yes",
+		"type": "button"
+	},
+	no : {
+		"name": action.join,
+		"value": "no",
+		"text": "No",
+		"type": "button"
+	}
+	maybe : {
+		"name": action.join,
+		"value": "maybe",
+		"text": "Maybe",
+		"type": "button"
+	}
+	standby : {
+		"name": action.join,
+		"value": "standby",
+		"text": "Standby",
+		"type": "button"
+	}
+	imon : {
+		"name": action.join,
+		"value": "imon",
+		"text": "I'm On",
+		"type": "button"
+	}
+	illgeton : {
+		"name": action.join,
+		"value": "illgeton",
+		"text": "I'll Get On",
+		"type": "button"
+	}
+}
 
 var siteData = site.getSiteData();
 /* 
@@ -255,29 +287,8 @@ module.exports.handleDestinyReq = function (req, res){
 		return users.getPlayerName(user);
 	}
 
-	/* sends a "Player is on!" message
-	*
-	*	PetterNincompoop is on Destiny!
-	*	Join them? [yes] [maybe] [no]
-	*
-	*/
-	function sendImOn(payload, user){
-		debug('SendImOn: \n' + "payload:" + JSON.stringify(payload, null, 2)
-		+ "\n user:" + JSON.stringify(user, null, 2));
-		
-		var username = getNameRef(user);
-		var title = "_*" + username + "*" + " is on Destiny!_";
-		// TODO getMessageTitle(message, user); // get title based on message type and other properties
-		var message = {
-			"text": title,
-			"username": staticProps.appName,
-			"icon_url": staticProps.iconUrl,
-			"replace_original": true,
-			"attachments": [
-				getJoinAttachment(username, true, user)
-			]
-		}
-		
+	/* get action channel from payload */
+	function getChannelId(payload){
 		// update channel id for message api
 		if(payload.channel_id){
 			message.channel = payload.channel_id;
@@ -285,28 +296,41 @@ module.exports.handleDestinyReq = function (req, res){
 		else{
 			message.channel = payload.channel.id;
 		}
+	}
+	
+	/* returns a new basic slack message with attachments */
+	function slackMessage(title, channel, attachments){
+		var message = {
+			"text": title,
+			"username": staticProps.appName,
+			"icon_url": staticProps.iconUrl,
+			"replace_original": true,
+			"attachments": attachments,
+			channel = channel
+		}
 		
 		// stringify attachments array
 		message.attachString = JSON.stringify(message.attachments);
-		slack.postMessage(message, siteData.appAuthToken, function(messageId){
-			debug('in post callback. messageId:' + messageId);
-			
-			// store message
-			addMessage(messageId, message, payload, user);
-			
-			// send update message
-			sendMessageUpdateMenu(payload.response_url, messageId);
-		});
+		return message;
 	}
 
-	function addMessage(messageId, message, payload, user){
+	function addMessage(messageId, message, payload, user, buttonKeys){
 		// MessageData(join, activity, time, timeZone)
 		var join = {
 			hasJoin: true,
-			
-			hasYes: true,
-			hasNo: true, 
+			buttons: {}
 		};
+		
+		if(buttonKeys){
+			for(var i = 0; i < buttonKeys.length; i++){
+				var key = buttonKeys[i];
+				join.buttons[key] = {
+					uids: [],
+					limit: 0
+				}
+			}
+		}
+		
 		var xtraData = new MessageData(join, [], Date.now(), "Eastern");
 		// new Message(timestamp, responseUrl, dateAdded, dateModified, userId, extraData, orginalMessage)
 		messageCache[messageId] = new Message(messageId, "", Date.now(), Date.now(), user.userId, xtraData, message);
@@ -332,6 +356,30 @@ module.exports.handleDestinyReq = function (req, res){
 				"type": "button"
 			});
 		}
+		
+		/*  Join
+				Add | Remove
+				Add-Yes | Rm-Yes
+				Add-No | Rm-No
+				Add-Maybe | Rm-Maybe
+				Add-Standby | Rm-Standby
+				? | Yes Limit
+					0, 3, 4, 6
+			Activity
+				Clear(?)
+				Add-Trials | Rm-Trials(?)
+				Add-Raid | Rm-Raid(?)
+				...
+			Date
+				Now , Today , Tommorow , F , Sat , Sun , Other
+						Month -> (This) + 1
+						Day -> (This) -> + EoM | 1-31
+					Hour -> 1-12
+					AmPm -> AM, PM
+					
+			Start Over
+				avl everywher, resets to top
+		*/
 		var message = {
 			"attachments": [
 				{
@@ -347,72 +395,184 @@ module.exports.handleDestinyReq = function (req, res){
 		}
 		slack.postMessageToSlackResponseURL(responseURL, message);
 	}
-
+	
+	/* sends a new templated slack message w title and attachments to channel used in action */
+	function sendNewBasicSlack(payload, user, title, attachments, joinButtons, title, time){
+		var fullTitle = title.replace(TITLE_UID, getNameRef(user));
+		if(time.general){
+			fullTitle = fullTitle.replace(TITLE_TIME, time.general);
+		} else if (time.specific){
+			getTimeFromObj(time);
+			var msFormat = "<!date^"+time.specific.ms+"^{date_short_pretty} at {time}|"+time.specific.fallback+">";
+			fullTitle = fullTitle.replace(TITLE_TIME, msFormat);
+		}
+		
+		var message = slackMessage(
+			fullTitle, 
+			getChannelId(payload), 
+			attachments);
+			
+		if(!joinButtons){
+			joinButtons = [joinButtons.yes.value, joinButtons.no.value];
+		}
+		
+		slack.postMessage(message, siteData.appAuthToken, function(messageId){
+			debug('in post callback. messageId:' + messageId);
+			
+			// store message
+			addMessage(messageId, message, payload, user, joinButtons, title, time);
+			
+			// send update message
+			sendMessageUpdateMenu(payload.response_url, messageId);
+		});
+	}
+	
+	/* sends a "Player is on!" message
+	*
+	*	PetterNincompoop is on Destiny!
+	*	Join them? [yes] [maybe] [no]
+	*
+	*/
+	function sendImOn(payload, user){
+		sendNewBasicSlack(payload, user, 
+			"_*" + TITLE_UID + "*" + " is on Destiny!_", 
+			getJoinAttachment(getNameRef(user), true, user),
+			[joinButtons.yes, joinButtons.no],
+			{now: true});
+	}
+	
 	/* send a "getting on at..." message
 	* 	can be result of specific time buttons or
 	* 	result of cache menu responses
 	*/
 	function sendGettingOn(payload, user){
-		// clear private message
-		clearPrivate(payload.response_url);
-		
-		var time_day = "Sometime Today";
-		
+		var time_day = "Sometime In the Future";
 		if(imon_cache[payload.user.id] && payload.actions[0].selected_options){
 			time_day = imon_cache[payload.user.id] + " " + payload.actions[0].selected_options[0].value;
 		}else{
 			time_day = payload.actions[0].value;
 		}
-		
 		imon_cache[payload.user.id] = null;
 		
-		var username = getNameRef(user);
-		var title = "_*" + username + "*" + " is getting on Destiny at:_\n";
-		title += "*"+time_day+"*";
-		
-		var message = {
-			"text": title,
-			"username": staticProps.appName,
-			"icon_url": staticProps.iconUrl,
-			"replace_original": true,
-			"attachments": [
-				getJoinAttachment(username, true, user)
-			]
-		};
-		
+		sendNewBasicSlack(payload, user, 
+			"_*" + TITLE_UID + "*" + " is getting on Destiny *" + TITLE_TIME + "*_", 
+			getJoinAttachment(getNameRef(user), true, user),
+			[joinButtons.yes, joinButtons.no],
+			{specific: {
+				hour: 1,
+				min: 2,
 				
+				day: 12,
+				month: 11,
 				
-		slack.postMessageToSlackResponseURL(siteData.generalWebhook, message);
+				tz: "Eastern"
+				}
+			}
+		);
 	}
 
 	/* send a "anyone getting on?" message
-	* 	TODO not fully implemented
 	*/
 	function sendAskGetOn(payload, user){
-		// clear private message
-		clearPrivate(payload.response_url);
+		sendNewBasicSlack(payload, user, 
+			"*" + TITLE_UID + ":* " +"_Is anyone getting on Destiny *" + TITLE_TIME + "*?_", 
+			getJoinAttachment(getNameRef(user), false, user, null, [joinButtons.imon, joinButtons.illgeton]),
+			[joinButtons.imon, joinButtons.illgeton],
+			{general: timeGenVals.today});
 		
-		var time = "Today"; // Tonight | Tommorow | this Weekend
-		
-		var username = getNameRef(user);
-		var title = "*" + username + ":* " +"_Is anyone getting on Destiny " + time + "?_";
-		
-		var message = {
-			"text": title,
-			"username": staticProps.appName,
-			"icon_url": staticProps.iconUrl,
-			"replace_original": true,
-			"attachments": [
-				getJoinAttachment(username, false, user)
-			]
-		}
-		slack.postMessageToSlackResponseURL(siteData.generalWebhook, message);
 	}
+	
+	const TITLE_UID = "#UID";
+	const TITLE_TIME = "#TIME";
+	
+	const timeGenVals = {
+		today: 			"Today",
+		tonight: 		"Tonight",
+		tommorow: 		"Tommorow",
+		thisWeekend: 	"This Weekend",
+	}
+	
+	var time = {
+		now: true,
+		
+		general: timeGenVals.today, 
+		
+		specific: {
+			hour: 1,
+			min: 2,
+			
+			day: 12,
+			month: 11,
+			year: 2017,
+			
+			tz: "Eastern",
+			mil: 12345,
+			fallback: "Feb 18, 2014 at 6:39 AM PST"
+		}
+	}
+	
+	/* set the mil and fallback values in time.specific */
+	function getTimeFromObj(time){
+		if(!time.specific.mil){
+			var utcOffSet = utcOffsets[tzKeyValues[isDst()][time.tz.toLowerCase()]];
+			var dt = new Date(time.specific.day+"/"+time.specific.month+"/"+time.specific.year+
+							" "+time.specific.hour+":"+time.specific.min+" "+utcOffset);
+			time.specific.mil = dt.getTime();
+			time.specific.fallback = dt.toString();
+		}
+	}
+	
+	const tzKeyValues = {
+		eastern: "Eastern",
+		east: "Eastern",
+		est: "Eastern",
+		edt: "Eastern",
+		
+		central: "Central",
+		cent: "Central",
+		cst: "Central",
+		cdt: "Central",
+		
+		mountain: "Mountain",
+		mount: "Mountain",
+		mst: "Mountain",
+		mdt: "Mountain",
+		
+		pacific: "Pacific",
+		pac: "Pacific",
+		pst: "Pacific",
+		pdt: "Pacific",
+	}
+	
+	const utcOffsets = {
+		"true" : {
+			Eastern:  "UTC-04:00",
+			Central:  "UTC-05:00",
+			Mountain: "UTC-06:00",
+			Pacific:  "UTC-07:00",
+		}, 
+		"false" : {
+			Eastern:  "UTC-05:00",
+			Central:  "UTC-06:00",
+			Mountain: "UTC-07:00",
+			Pacific:  "UTC-08:00",
+		}
+	}
+	
+	/* is the current server time in daylight savings time */
+	function isDst(){
+		var today = new Date();
+		var jan = new Date(today.getFullYear(), 0, 1);
+		var jul = new Date(today.getFullYear(), 6, 1);
+		var stdTimezoneOffset =  Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
 
+		return today.getTimezoneOffset() < stdTimezoneOffset;
+	}
+	
 	/* 	the join question attachment for orginal message posts
 	* 	buttons triger the 'join' action whcih updates the poll results
 	*/
-	function getJoinAttachment(username, ask=true, user, message){
+	function getJoinAttachment(username, ask=true, user, message, joinButtonArray){
 		var attach = {
 			"text": ask ? staticProps.message.joinAsk : "",
 			"fallback": "Join " + username + " on Destiny?",
@@ -421,53 +581,24 @@ module.exports.handleDestinyReq = function (req, res){
 			"attachment_type": "default",
 			"thumb_url": users.getThumbUrl(user),
 
-			"actions": [{
-				"name": action.join,
-				"value": "yes",
-				"text": "Yes",
-				"type": "button"
-			},{
-				"name": action.join,
-				"value": "no",
-				"text": "No",
-				"type": "button"
-			}]
+			actions: []
 		}
 		
-		if(message){
-			attach.actions = [];
-			if(message.messageData.join.hasYes){
-				attach.actions.push({
-					"name": action.join,
-					"value": "yes",
-					"text": "Yes",
-					"type": "button"
-				});
+		if(joinButtonArray){
+			for(var i = 0; i < joinButtonArray.length; i++){
+				attach.actions.push(joinButtonArray[i]);
 			}
-			if(message.messageData.join.hasMaybe){
-				attach.actions.push({
-					"name": action.join,
-					"value": "maybe",
-					"text": "Maybe",
-					"type": "button"
-				});
+		}else if(message){
+			var buttonKeys = Object.keys(joinButtons);
+			for(var i = 0; i < buttonKeys.length; i++){
+				var key = buttonKeys[i];
+				if(message.data.join.buttons[key]){
+					attach.actions.push(joinButtons[key]);
+				}
 			}
-			if(message.messageData.join.hasNo){
-				attach.actions.push({
-					"name": action.join,
-					"value": "no",
-					"text": "No",
-					"type": "button"
-				});
-			}
-			if(message.messageData.join.hasStandby){
-				attach.actions.push({
-					"name": action.join,
-					"value": "standby",
-					"text": "Standby",
-					"type": "button"
-				});
-			}
+		} else {
+			attach.actions.push(joinButtons.yes);
+			attach.actions.push(joinButtons.no);
 		}
 		
 		return attach;
@@ -552,117 +683,73 @@ module.exports.handleDestinyReq = function (req, res){
 		sendMessageUpdateMenu(payload.response_url, ts);
 	}
 
-	const fieldValSplit = ", ";
 	/* 
 	*	the join poll result field array
 	*/
 	function getJoinResultFields(message){
 		var fieldsArray = [];
-		if(message.messageData.join.hasYes){
-			fieldsArray.push({
-				title: "Yes",
-				value: "",
-				"short": false
-			});
-			populateField(message, "yess", fieldsArray[fieldsArray.length-1]);
+		
+		// get all the button types' keys
+		var buttonKeys = Object.keys(joinButtons);
+		for(var i = 0; i < buttonKeys.length; i++){
+			var key = buttonKeys[i];
+			// add new field if message has this button
+			if(message.data.join.buttons[key]){
+				fieldsArray.push({
+					title: joinButtons[key].text,
+					value: "",
+					"short": false
+				});
+				populateFieldValue(message, key, fieldsArray[fieldsArray.length-1]);
+			}
 		}
 		
-		if(message.messageData.join.hasStandby){
-			fieldsArray.push({
-				title: "Standby",
-				value: "",
-				"short": false
-			});
-			populateField(message, "standbys", fieldsArray[fieldsArray.length-1]);
-		}
-		
-		if(message.messageData.join.hasMaybe){
-			fieldsArray.push({
-				title: "Maybe",
-				value: "",
-				"short": false
-			});
-			populateField(message, "maybes", fieldsArray[fieldsArray.length-1]);
-		}
-		
-		if(message.messageData.join.hasNo){
-			fieldsArray.push({
-				title: "No",
-				value: "",
-				"short": false
-			});
-			populateField(message, "nos", fieldsArray[fieldsArray.length-1]);
-		}
-		
+		debug("FieldsArray:");
+		debug(fieldsArray);
 		return fieldsArray;
 	}
 	
-	function populateField(message, joinField, field){
-		if(message.messageData.join[joinField]){
-			var joinValues = message.messageData.join[joinField];
-			for(var i = 0; i < joinValues.length; i++){
-				users.getUser(joinValues[i], null, function(user){
+	const fieldValSplit = ", ";
+	function populateFieldValue(message, buttonKey, field){
+		if(message.data.join.buttons[buttonKey] && message.data.join.buttons[buttonKey].uids){
+			var uids = message.data.join.buttons[buttonKey].uids;
+			for(var i = 0; i < uids.length; i++){
+				users.getUser(uids[i], null, function(user){
 					field.value += (i > 0 ? fieldValSplit : "") + getNameRef(user);
 				} );
 			}
 		}
 	}
-
-	// add or remove from message.messageData.join[choice]
-	function addUserToJoinArea(user, choice, message){
-		if(choice == "yes"){
-			addAndRemove(user, message, "yess", ["nos", "maybes", "standbys"], 
-				message.messageData.join.hasYesLimit ? message.messageData.join.yesLimit : -1);
-			
-		} else if(choice == "maybe"){
-			addAndRemove(user, message, "maybes", ["nos", "yess", "standbys"]);
-			
-		} else if(choice == "no"){
-			addAndRemove(user, message, "nos", ["yess", "maybes", "standbys"]);
-			
-		} else if(choice == "standby"){
-			addAndRemove(user, message, "standbys", ["nos", "maybes", "yess"]);
-			
-		}
-	}
 	
 	// remove user from field
-	function addAndRemove(user, message, joinArea, removeArray, limit){
-		var joinValues = [];
-		if(message.messageData.join[joinArea]){
-			joinValues = message.messageData.join[joinArea];
+	function addAndRemove(user, message, joinArea){
+		var uids = message.data.join.buttons[joinArea].uids;
+		if(!uids){
+			uids = [];
+			message.data.join.buttons[joinArea].uids = uids;
+		}
+	
+		// remove user from all arrays
+		var buttonKeys = Object.keys(joinButtons);
+		for(var i = 0; i < buttonKeys.length; i++){
+			// remove from area array
+			var button = message.data.join.buttons[buttonKeys[i]];
+			if(button && button.uids){
+				var index = button.uids.indexOf(user.id);
+				if(index > -1){
+					button.uids.splice(index, 1);
+				}
+			}
+		}
+			
+		// add user, check limit
+		var limit = message.data.join.buttons[joinArea].limit;
+		if(limit && limit > 0){
+			if(uids.length < limit){
+				uids.push(user.id);
+			}
 		}else{
-			message.messageData.join[joinArea] = joinValues;
-		}
-		
-		// remove user from array
-		{
-			var index = joinValues.indexOf(user.id);
-			if(index > -1){
-				joinValues.splice(index, 1);
-			}else{
-				// add user, check limit
-				if(limit && limit > 0){
-					if(joinValues.length < limit){
-						joinValues.push(user.id);
-					}
-				}else{
-					joinValues.push(user.id);
-				}
-			}
-		}
-		
-		if(removeArray){
-			for(var i = 0; i < removeArray.length; i++){
-				// remove from area array
-				var removeValues = message.messageData.join[removeArray[i]];
-				if(removeValues){
-					var rIndex = removeValues.indexOf(user.id);
-					if(rIndex > -1){
-						removeValues.splice(rIndex, 1);
-					}
-				}
-			}
+			uids.push(user.id);
 		}
 	}
 
@@ -677,7 +764,7 @@ module.exports.handleDestinyReq = function (req, res){
 		var messageClass = messageCache[payload.message_ts];
 		
 		// add user to choice area, remove from others
-		addUserToJoinArea(payload.user, payload.actions[0].value, messageClass);
+		addAndRemove(payload.user, messageClass, payload.actions[0].value);
 		
 		// build poll result attahcment w field array available in join data
 		
@@ -918,6 +1005,7 @@ module.exports.handleDestinyReq = function (req, res){
 		slack.postMessageToSlackResponseURL(responseURL, message)
 	}
 
+	
 	/* 
 	*	replaces the original private app message with "message posted"
 	* 	so that the buttons cannot be pressed again and takes up less space
@@ -929,7 +1017,6 @@ module.exports.handleDestinyReq = function (req, res){
 		}
 		slack.postMessageToSlackResponseURL(responseURL, message);
 	}
-
 
 	/* 
 	*	the basic menu
