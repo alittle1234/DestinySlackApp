@@ -80,12 +80,14 @@ const activity = {
 
 module.exports = function (siteData) {
     var module = {};
-    
+	
 	/* 
 	* 	handle all the destiny app requests
 	*/
 	module.handleDestinyReq = function (req, res){
 		res.status(200).end(); // prevents weird time-out response
+		
+		debug('siteData: ' + siteData );
 		
 		var concat = '';
 		try{
