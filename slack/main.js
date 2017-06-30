@@ -80,50 +80,49 @@ const activity = {
 
 
 var siteData = site.getSiteData();
-module.exports = function () {
-    var module = {};
-	/* 
-	* 	handle all the destiny app requests
-	*/
-	module.handleDestinyReq = function (req, res){
-		res.status(200).end(); // prevents weird time-out response
-		
-		debug('siteData: ' + siteData );
-		
-		var concat = '';
-		try{
-			if(req.body){
-				var reqBody = req.body;
+/* 
+* 	handle all the destiny app requests
+*/
+module.exports.handleDestinyReq = function (req, res){
+	res.status(200).end(); // prevents weird time-out response
+	
+	debug('siteData: ' + siteData );
+	
+	var concat = '';
+	try{
+		if(req.body){
+			var reqBody = req.body;
+			
+			if(reqBody.payload){ // an action button was clicked
+				var payload = JSON.parse(reqBody.payload); // turn payload into json obj
 				
-				if(reqBody.payload){ // an action button was clicked
-					var payload = JSON.parse(reqBody.payload); // turn payload into json obj
-					
-					debug('payload: ' + JSON.stringify(payload, null, 2) );
-					
-					// get user
-					users.getUser(payload.user.id, null, function(user){
-						payload.user = user;
-						// perform action
-						handleDestinyButtonAction(payload);
-					} );
-				}else{
-					// SLASH COMMANDS
-					debug('ReqBody: ' + JSON.stringify(reqBody, null, 2) );
-					
-					// get user
-					users.getUser(reqBody.user_id, null, function(user){
-						reqBody.user = user;
-						// perform action
-						handleSlashCommand(reqBody);
-					} );
-				}
+				debug('payload: ' + JSON.stringify(payload, null, 2) );
+				
+				// get user
+				users.getUser(payload.user.id, null, function(user){
+					payload.user = user;
+					// perform action
+					handleDestinyButtonAction(payload);
+				} );
 			}else{
-				concat += ' NO BODY ';
+				// SLASH COMMANDS
+				debug('ReqBody: ' + JSON.stringify(reqBody, null, 2) );
+				
+				// get user
+				users.getUser(reqBody.user_id, null, function(user){
+					reqBody.user = user;
+					// perform action
+					handleSlashCommand(reqBody);
+				} );
 			}
-		}catch(e){
-			logger.error(e.message);
+		}else{
+			concat += ' NO BODY ';
 		}
+	}catch(e){
+		logger.error(e.message);
 	}
+}
+	
 
 		
 	/*
@@ -964,7 +963,5 @@ module.exports = function () {
 		logger.debug(message);
 	}
 
-    return module;
-};
 
 
