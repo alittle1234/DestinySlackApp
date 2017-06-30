@@ -106,8 +106,13 @@ module.exports = function (siteData) {
 				}else{
 					// SLASH COMMANDS
 					debug('ReqBody: ' + JSON.stringify(reqBody, null, 2) );
-					// TODO get user?
-					handleSlashCommand(reqBody);
+					
+					// get user
+					users.getUser(reqBody.user_id, null, function(user){
+						reqBody.user = user;
+						// perform action
+						handleSlashCommand(reqBody);
+					} );
 				}
 			}else{
 				concat += ' NO BODY ';
@@ -282,7 +287,7 @@ module.exports = function (siteData) {
 		
 		// stringify attachments array
 		message.attachString = JSON.stringify(message.attachments);
-		postMessage(message, siteData.appAuthToken, function(messageId){
+		slack.postMessage(message, siteData.appAuthToken, function(messageId){
 			debug('in post callback. messageId:' + messageId);
 			
 			// store message
