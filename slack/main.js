@@ -87,6 +87,8 @@ module.exports.handleDestinyReq = function (req, res){
 	res.status(200).end(); // prevents weird time-out response
 	
 	debug('siteData: ' + siteData );
+	debug('siteDataP:' + JSON.parse(siteData));
+	debug('siteDataS:' + JSON.stringify(siteData, null, 2));
 	
 	var concat = '';
 	try{
