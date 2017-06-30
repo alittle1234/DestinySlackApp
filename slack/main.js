@@ -88,6 +88,7 @@ module.exports.handleDestinyReq = function (req, res){
 	
 	debug('siteData: ' + siteData );
 	debug('siteDataS:' + JSON.stringify(siteData, null, 2));
+	debug('siteDataGS:' + JSON.stringify(site.getSiteData(), null, 2));
 	//debug('siteDataP:' + JSON.parse(siteData));
 	
 	var concat = '';
