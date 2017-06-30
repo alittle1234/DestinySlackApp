@@ -606,6 +606,7 @@ module.exports.handleDestinyReq = function (req, res){
 	// add or remove from message.messageData.join[choice]
 	function addUserToJoinArea(user, choice, message){
 		if(choice == "yes"){
+			debug('chose yes');
 			addAndRemove(user, message, "yess", ["nos", "maybes", "standbys"], 
 				message.messageData.join.hasYesLimit ? message.messageData.join.yesLimit : -1);
 			
@@ -625,7 +626,9 @@ module.exports.handleDestinyReq = function (req, res){
 	function addAndRemove(user, message, joinField, removeArray, limit){
 		var joinValues = [];
 		if(message.messageData.join[joinField]){
+			debug('found field');
 			joinValues = message.messageData.join[joinField];
+			debug(joinValues);
 		}else{
 			message.messageData.join[joinField] = joinValues;
 		}
@@ -657,6 +660,9 @@ module.exports.handleDestinyReq = function (req, res){
 				}
 			}
 		}
+		
+		debug('done');
+		debug(joinValues);
 	}
 
 	/* 	
