@@ -78,9 +78,9 @@ const activity = {
 }
 
 
-module.exports = function (siteData) {
+module.exports = function (_siteData) {
     var module = {};
-	
+	var siteData = _siteData;
 	/* 
 	* 	handle all the destiny app requests
 	*/
