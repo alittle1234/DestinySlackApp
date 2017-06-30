@@ -643,43 +643,34 @@ module.exports.handleDestinyReq = function (req, res){
 		}
 		
 		// remove user from array
-		var index = joinValues.indexOf(user.id);
-		if(index > -1){
-			joinValues.splice(index, 1);
-		}else{
-			// add user, check limit
-			if(limit && limit > 0){
-				if(joinValues.length < limit){
+		{
+			var index = joinValues.indexOf(user.id);
+			if(index > -1){
+				joinValues.splice(index, 1);
+			}else{
+				// add user, check limit
+				if(limit && limit > 0){
+					if(joinValues.length < limit){
+						joinValues.push(user.id);
+					}
+				}else{
 					joinValues.push(user.id);
 				}
-			}else{
-				joinValues.push(user.id);
 			}
 		}
 		
 		if(removeArray){
-			debug('removeArray');
-			debug(removeArray);
 			for(var i = 0; i < removeArray.length; i++){
 				// remove from area array
 				var removeValues = message.messageData.join[removeArray[i]];
 				if(removeValues){
-					debug('area:');
-					debug(removeArray[i]);
-					debug(removeValues);
 					var rIndex = removeValues.indexOf(user.id);
-					if(index > -1){
-						debug('removing:');
+					if(rIndex > -1){
 						removeValues.splice(rIndex, 1);
-						message.messageData.join[removeArray[i]] = removeValues;
 					}
 				}
 			}
 		}
-		
-		debug('done');
-		debug(joinValues);
-		debug(message.messageData.join);
 	}
 
 	/* 	
