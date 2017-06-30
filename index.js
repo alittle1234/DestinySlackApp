@@ -75,18 +75,14 @@ app.get('/site/', function(req, res) {
 
 
 
-var siteData;
-function initSiteData(objectMap){
-	siteData = objectMap[1];
-}
 
 // *** initialize site data on startup
 db.getData( site.site_db, function(objectMap){
 	logger.debug('Performing Site Data Callback...');
-	initSiteData(objectMap);
+	site.initSiteData(objectMap[1]);
 });
 
-const main 		= require('./slack/main')(siteData);
+const main 		= require('./slack/main');
 
 
 /* 

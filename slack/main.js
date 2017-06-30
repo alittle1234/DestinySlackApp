@@ -6,6 +6,7 @@ const users 		= require.main.require('./user');
 const bungie 		= require.main.require('./bungie');
 const slack 		= require.main.require('./slack/request');
 const logger 		= require.main.require('./logger');
+const site  		= require.main.require('./site');
 
 /* 
 const tempMs = new Message("1234", "", Date.now(), Date.now(), "uid1234", new MessageData({hasJoin:true}, null, Date.now(), "Eastern"), null);
@@ -78,9 +79,9 @@ const activity = {
 }
 
 
-module.exports = function (_siteData) {
+var siteData = site.getSiteData();
+module.exports = function () {
     var module = {};
-	var siteData = _siteData;
 	/* 
 	* 	handle all the destiny app requests
 	*/

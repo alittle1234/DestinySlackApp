@@ -30,3 +30,13 @@ module.exports.site_db = {
 		}
 	]
 };
+
+
+var siteData = {};
+module.exports.initSiteData = function (_siteData){
+	siteData = _siteData;
+}
+
+module.exports.getSiteData = function (){
+	return siteData;
+}
